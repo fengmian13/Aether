@@ -1,6 +1,6 @@
 package com.anther.redis;
 
-import com.easymeeting.entity.constants.Constants;
+import com.anther.entity.constants.Constants;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
