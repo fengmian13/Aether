@@ -46,7 +46,7 @@ public class Constants {
      */
     public static final Integer REDIS_KEY_EXPIRES_DAY = REDIS_KEY_EXPIRES_ONE_MIN * 60 * 24;
 
-    private static final String REDIS_KEY_PREFIX = "easymeeting:";
+    private static final String REDIS_KEY_PREFIX = "anther:";
 
     public static final String REDIS_KEY_CHECK_CODE = REDIS_KEY_PREFIX + "checkcode:";
 

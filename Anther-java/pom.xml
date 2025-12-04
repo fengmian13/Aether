@@ -39,7 +39,7 @@
         <captcha.verion>1.6.2</captcha.verion>
         <netty.version>4.1.50.Final</netty.version>
         <redisson.version>3.12.3</redisson.version>
-        <lombok.version>1.18.22</lombok.version>
+        <lombok.version>1.18.34</lombok.version>
         <rabbitmq.version>5.14.2</rabbitmq.version>
     </properties>
 
