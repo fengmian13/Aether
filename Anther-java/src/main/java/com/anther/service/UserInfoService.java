@@ -1,11 +1,13 @@
 package com.anther.service;
 
+import java.io.IOException;
 import java.util.List;
 
 import com.anther.entity.query.UserInfoQuery;
 import com.anther.entity.po.UserInfo;
 import com.anther.entity.vo.PaginationResultVO;
 import com.anther.entity.vo.UserInfoVO;
+import org.springframework.web.multipart.MultipartFile;
 
 
 /**
@@ -97,4 +99,20 @@ public interface UserInfoService {
 	 * 登录
 	 */
 	UserInfoVO login(String email, String password);
+
+	/**
+	 * 登出
+	 */
+	void logout(String  email);
+
+
+	/**
+	 * 修改用户信息
+	 */
+	void updateUserInfo(MultipartFile avatar, UserInfo userInfo) throws IOException;
+
+	/**
+	 * 修改密码
+	 */
+	void updatePassword(String userId, String oldPassword, String newPassword);
 }

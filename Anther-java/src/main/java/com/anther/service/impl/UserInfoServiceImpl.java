@@ -1,5 +1,7 @@
 package com.anther.service.impl;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 
@@ -12,6 +14,7 @@ import com.anther.entity.vo.UserInfoVO;
 import com.anther.exception.BusinessException;
 import com.anther.redis.RedisComponent;
 import com.anther.utils.CopyTools;
+import com.anther.utils.FFmpegUtils;
 import org.springframework.stereotype.Service;
 
 import com.anther.entity.enums.PageSize;
@@ -23,6 +26,7 @@ import com.anther.mappers.UserInfoMapper;
 import com.anther.service.UserInfoService;
 import com.anther.utils.StringTools;
 import com.anther.entity.constants.Constants;
+import org.springframework.web.multipart.MultipartFile;
 
 
 /**
@@ -35,6 +39,9 @@ public class UserInfoServiceImpl implements UserInfoService {
 	private AppConfig appConfig;
 	@Resource
 	private RedisComponent redisComponent;
+
+	@Resource
+	private FFmpegUtils fFmpegUtils;
 
 	@Resource
 	private UserInfoMapper<UserInfo, UserInfoQuery> userInfoMapper;
@@ -220,4 +227,52 @@ public class UserInfoServiceImpl implements UserInfoService {
 		return userInfoVO;
 	}
 
+	/**
+	 * 登出
+	 */
+	@Override
+	public void logout(String email) {
+		UserInfo userInfo = this.userInfoMapper.selectByEmail(email);
+		redisComponent.cleanUserTokenByUserId(userInfo.getUserId());
+//		redisComponent.removeUserHeartBeat(userInfo.getUserId());
+		userInfo.setLastOffTime(new Date().getTime());
+		this.userInfoMapper.updateByEmail(userInfo, email);
+	}
+
+	@Override
+	public void updateUserInfo(MultipartFile file, UserInfo userInfo) throws IOException {
+		if (file != null) {
+			String folder = appConfig.getProjectFolder() + Constants.FILE_FOLDER_FILE+Constants.FILE_FOLDER_AVATAR_NAME;//  头像保存目录
+			File folderFile = new File(folder); //  创建保存文件夹
+			if (!folderFile.exists()) { //  判断文件夹是否存在
+				folderFile.mkdirs();
+			}
+			//  保存文件
+			String realFileName = userInfo.getUserId() + Constants.IMAGE_SUFFIX;// 文件名
+			String filePath = folderFile + realFileName; // 文件保存路径
+			File tempFile = new File(appConfig.getProjectFolder() + Constants.FILE_FOLDER_TEMP + StringTools.getRandomString(Constants.LENGTH_30));// 临时文件保存路径
+			file.transferTo(tempFile);// 保存文件
+			fFmpegUtils.createImageThumbnail(tempFile, filePath);// 创建缩略图
+		}
+		this.userInfoMapper.updateByUserId(userInfo, userInfo.getUserId());
+		TokenUserInfoDto tokenUserInfoDto = redisComponent.getTokenUserInfoDtoByUserId(userInfo.getUserId());
+		tokenUserInfoDto.setNickName(userInfo.getNickName());
+		tokenUserInfoDto.setSex(userInfo.getSex());
+		redisComponent.saveTokenUserInfoDto(tokenUserInfoDto);
+	}
+
+	@Override
+	public void updatePassword(String userId, String oldPassword, String newPassword){
+		UserInfo userInfo = this.userInfoMapper.selectByUserId(userId);
+		if (null == userInfo){
+			throw new BusinessException("用户不存在");
+		}
+		if (!userInfo.getPassword().equals(StringTools.encodeByMD5(oldPassword))){
+			throw new BusinessException("旧密码错误");
+		}
+		UserInfo updateInfo = new UserInfo();
+		updateInfo.setPassword(StringTools.encodeByMD5(newPassword));
+		this.userInfoMapper.updateByUserId(updateInfo, userId);
+		redisComponent.cleanUserTokenByUserId(userId);// 修改密码以后登出，清除token
+	}
 }

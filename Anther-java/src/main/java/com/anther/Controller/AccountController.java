@@ -1,5 +1,7 @@
 package com.anther.Controller;
 
+import com.anther.entity.dto.TokenUserInfoDto;
+import com.anther.entity.po.UserInfo;
 import com.anther.entity.vo.CheckCodeVO;
 import com.anther.entity.vo.ResponseVO;
 import com.anther.entity.vo.UserInfoVO;
@@ -11,12 +13,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.io.IOException;
 
 /**
  * @param
@@ -82,7 +86,12 @@ public class AccountController extends ABaseController {
         }
     }
 
-
+    /**
+     * @description: 注册
+     * @author 吴磊
+     * @date 2025/12/4 22:40
+     * @version 1.0
+     */
     @RequestMapping("/login")
     public ResponseVO login(@NotEmpty String checkCodeKey,
                             @NotEmpty @Email String email,
@@ -98,6 +107,51 @@ public class AccountController extends ABaseController {
             redisComponent.cleanCheckCode(checkCodeKey);
         }
     }
+
+    /**
+     * @description: 登出
+     * @author 吴磊
+     * @date 2025/12/7 16:32
+     * @version 1.0
+     */
+    @RequestMapping("/logout")
+    public ResponseVO logout(@NotEmpty @Email String email){
+        this.userInfoService.logout(email);
+        return getSuccessResponseVO(null);
+    }
+
+    /**
+     * @description: 修改用户信息
+     * @author 吴磊
+     * @date 2025/12/7 16:42
+     * @version 1.0
+     */
+    @RequestMapping("/updateUserInfo")
+    public ResponseVO updateUserInfo(MultipartFile avatar, @NotEmpty String nickName, @NotNull Integer sex) throws IOException {
+        TokenUserInfoDto tokenUserInfoDto = getTokenUserInfo();
+        UserInfo userInfo = new UserInfo();
+        userInfo.setNickName(nickName);
+        userInfo.setSex(sex);
+        userInfo.setUserId(tokenUserInfoDto.getUserId());
+        userInfoService.updateUserInfo(avatar, userInfo);
+        return getSuccessResponseVO(null);
+    }
+
+
+    /**
+     * @description: 修改密码
+     * @author 吴磊
+     * @date 2025/12/7 17:07
+     * @version 1.0
+     */
+    @RequestMapping("/updatePassword")
+    public ResponseVO updatePassword(@NotEmpty String oldPassword,
+                                     @NotEmpty String newPassword) {
+        TokenUserInfoDto tokenUserInfoDto = getTokenUserInfo();
+        this.userInfoService.updatePassword(tokenUserInfoDto.getUserId(), oldPassword, newPassword);
+        return getSuccessResponseVO(null);
+    }
+
 
 
 }
