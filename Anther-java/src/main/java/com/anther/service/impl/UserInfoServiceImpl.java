@@ -7,7 +7,7 @@ import java.util.List;
 
 import javax.annotation.Resource;
 
-import com.anther.entity.confige.AppConfig;
+import com.anther.entity.config.AppConfig;
 import com.anther.entity.dto.TokenUserInfoDto;
 import com.anther.entity.enums.UserStatusEnum;
 import com.anther.entity.vo.UserInfoVO;

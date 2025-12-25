@@ -56,9 +56,9 @@ public class Constants {
 
     public static final String REDIS_KEY_WS_USER_HEART_BEAT = REDIS_KEY_PREFIX + "ws:user:heartbeat";
 
-    public static final String REDIS_KEY_MEETING_ROOM = REDIS_KEY_PREFIX + "meeting:room:";
+    public static final String REDIS_KEY_MEETING_ROOM = REDIS_KEY_PREFIX + "anther:room:";
 
-    public static final String REDIS_KEY_INVITE_MEMBER = REDIS_KEY_PREFIX + "meeting:invite:member:";
+    public static final String REDIS_KEY_INVITE_MEMBER = REDIS_KEY_PREFIX + "anther:invite:member:";
 
     public static final String REDIS_KEY_SYS_SETTING = REDIS_KEY_PREFIX + "sysSetting:";
 

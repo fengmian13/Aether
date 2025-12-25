@@ -1,4 +1,4 @@
-package com.anther.entity.confige;
+package com.anther.entity.config;
 
 import com.anther.utils.StringTools;
 import org.slf4j.Logger;
