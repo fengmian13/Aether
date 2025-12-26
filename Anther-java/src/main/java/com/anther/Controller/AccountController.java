@@ -87,7 +87,7 @@ public class AccountController extends ABaseController {
     }
 
     /**
-     * @description: 注册
+     * @description: 登录
      * @author 吴磊
      * @date 2025/12/4 22:40
      * @version 1.0

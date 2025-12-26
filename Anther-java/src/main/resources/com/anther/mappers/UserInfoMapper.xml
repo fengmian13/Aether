@@ -474,6 +474,11 @@
 		select <include refid="base_column_list" /> from user_info where user_id=#{userId}
 	</select>
 
+	<!-- 根据NickName获取对象 -->
+	<select id="selectByNickName" resultMap="base_result_map" >
+		select <include refid="base_column_list" /> from user_info where nick_name=#{nickName}
+	</select>
+
 	<!-- 根据Email修改-->
 	<update id="updateByEmail" parameterType="com.anther.entity.po.UserInfo">
 		 UPDATE user_info

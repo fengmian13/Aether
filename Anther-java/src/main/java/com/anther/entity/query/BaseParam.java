@@ -6,6 +6,17 @@ public class BaseParam {
 	private Integer pageNo;
 	private Integer pageSize;
 	private String orderBy;
+
+	private Boolean queryUserInfo;
+
+	public Boolean getQueryUserInfo() {
+		return queryUserInfo;
+	}
+
+	public void setQueryUserInfo(Boolean queryUserInfo) {
+		this.queryUserInfo = queryUserInfo;
+	}
+
 	public SimplePage getSimplePage() {
 		return simplePage;
 	}
