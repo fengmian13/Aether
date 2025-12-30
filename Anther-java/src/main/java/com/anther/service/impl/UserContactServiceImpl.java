@@ -15,9 +15,7 @@ import com.anther.mappers.UserContactApplyMapper;
 import com.anther.mappers.UserContactMapper;
 import com.anther.mappers.UserInfoMapper;
 import com.anther.service.UserContactService;
-import com.sun.org.apache.bcel.internal.generic.NEW;
 import org.apache.commons.lang3.ArrayUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;

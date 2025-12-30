@@ -157,14 +157,14 @@ public class ChannelContextUtils {
             userInfo.setLastLoginTime(System.currentTimeMillis());
             userInfoMapper.updateByUserId(userInfo, userId);
 
-            //如果在会议中，自动加入会议 TODO: 重新处理
-            TokenUserInfoDto tokenUserInfoDto = redisComponet.getTokenUserInfoDtoByUserId(userId);
-            if (tokenUserInfoDto.getCurrentMeetingId() == null) {
-                return;
-            }
-
-            //加入会议室
-            addMeetingRoom(tokenUserInfoDto.getCurrentMeetingId(), userId);
+//            //如果在会议中，自动加入会议 TODO: 重新处理
+//            TokenUserInfoDto tokenUserInfoDto = redisComponet.getTokenUserInfoDtoByUserId(userId);
+//            if (tokenUserInfoDto.getCurrentMeetingId() == null) {
+//                return;
+//            }
+//
+//            //加入会议室
+//            addMeetingRoom(tokenUserInfoDto.getCurrentMeetingId(), userId);
         } catch (Exception e) {
             log.error("初始化链接失败", e);
         }
