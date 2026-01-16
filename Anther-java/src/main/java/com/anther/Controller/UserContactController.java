@@ -50,6 +50,11 @@ public class UserContactController extends ABaseController{
     @RequestMapping("/search")
     public ResponseVO search(@NotEmpty String contactId){
         TokenUserInfoDto tokenUserInfoDto = getTokenUserInfo();
+        // TODO: 修改查询
+        //  1、userID和GroupID，分别加上前缀U和G
+        //  2、通过获取contactId中的第一个字母判断是搜索用户还是群组
+        //  3、分开调用不同的方式
+        // 用户增加地区，以及经纬度
         UserContactControllerDto resultDto = userContactService.searchContact(tokenUserInfoDto.getUserId(), contactId);
         return getSuccessResponseVO(resultDto);
     }

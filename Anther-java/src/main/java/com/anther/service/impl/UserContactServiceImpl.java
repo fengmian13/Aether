@@ -1,6 +1,7 @@
 package com.anther.service.impl;
 
 import com.anther.entity.dto.UserContactControllerDto;
+import com.anther.entity.enums.ContactTypeEnum;
 import com.anther.entity.enums.ResponseCodeEnum;
 import com.anther.entity.enums.UserContactApplyStatusEnum;
 import com.anther.entity.enums.UserContactStatusEnum;
@@ -16,6 +17,8 @@ import com.anther.mappers.UserContactMapper;
 import com.anther.mappers.UserInfoMapper;
 import com.anther.service.UserContactService;
 import org.apache.commons.lang3.ArrayUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.info.ProjectInfoAutoConfiguration;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -50,10 +53,21 @@ public class UserContactServiceImpl implements UserContactService {
         UserContactControllerDto resultDto = new UserContactControllerDto();
         resultDto.setNickName(userInfo.getNickName());
         resultDto.setSex(userInfo.getSex());
+        resultDto.setContactId(userInfo.getUserId());
         // 是自己
         if (userId.equals(contactId)) {
             resultDto.setStatus(-UserContactApplyStatusEnum.PASS.getStatus());
             return resultDto;
+        }
+
+        // 判断是用户还是群组
+        System.out.println(userInfo.getContactType());
+        if (ContactTypeEnum.USER.getType().equals(userInfo.getContactType())){
+            resultDto.setContactType(ContactTypeEnum.USER.getType());
+        } else if (ContactTypeEnum.GROUP.getType().equals(userInfo.getContactType())) {
+            resultDto.setContactType(ContactTypeEnum.GROUP.getType());
+        }else {
+            resultDto.setContactType("NULL");
         }
         // 查询申请
         UserContactApply userContactApply = userContactApplyMapper.selectByApplyUserIdAndReceiveUserId(userId, contactId);

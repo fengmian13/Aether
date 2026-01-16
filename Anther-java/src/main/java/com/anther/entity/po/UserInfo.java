@@ -73,6 +73,15 @@ public class UserInfo implements Serializable {
 	 */
 	private String meetingNo;
 
+	private String contactType;
+
+	public String getContactType() {
+		return contactType;
+	}
+
+	public void setContactType(String contactType) {
+		this.contactType = contactType;
+	}
 
 	public void setUserId(String userId){
 		this.userId = userId;
