@@ -15,6 +15,7 @@ import com.anther.exception.BusinessException;
 import com.anther.redis.RedisComponent;
 import com.anther.utils.CopyTools;
 import com.anther.utils.FFmpegUtils;
+import com.anther.utils.IdTools;
 import org.springframework.stereotype.Service;
 
 import com.anther.entity.enums.PageSize;
@@ -180,10 +181,11 @@ public class UserInfoServiceImpl implements UserInfoService {
 	public void register(String email, String password, String nickName, Integer sex) {
 		UserInfo userInfo = this.userInfoMapper.selectByEmail(email);
 		if (userInfo != null) {
-			throw new RuntimeException("邮箱已存在");
+			throw new BusinessException("邮箱已存在");
 		}
 		Date nowDate = new Date();
 		String userId = StringTools.getRandomNumber(Constants.LENGTH_12);
+		userId = IdTools.getUserId(userId);
 
 		userInfo = new UserInfo();
 		userInfo.setUserId(userId);

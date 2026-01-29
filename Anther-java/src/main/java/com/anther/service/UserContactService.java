@@ -12,7 +12,7 @@ public interface UserContactService {
 
     UserContactControllerDto searchContact(String userId, String contactId);
 
-    List<UserContact> findListByParam(UserContactQuery query);
+    List<UserContactControllerDto> findListByParam(UserContactQuery query);
 
     void delContact(String userId, String contactId, Integer status);
 }

@@ -1,15 +1,19 @@
 package com.anther.service.impl;
 
+import com.anther.entity.dto.ContactApplyDto;
 import com.anther.entity.dto.MessageSendDto;
 import com.anther.entity.dto.TokenUserInfoDto;
 import com.anther.entity.enums.*;
 import com.anther.entity.po.UserContact;
 import com.anther.entity.po.UserContactApply;
+import com.anther.entity.po.UserInfo;
 import com.anther.entity.query.UserContactApplyQuery;
 import com.anther.entity.query.UserContactQuery;
+import com.anther.entity.query.UserInfoQuery;
 import com.anther.exception.BusinessException;
 import com.anther.mappers.UserContactApplyMapper;
 import com.anther.mappers.UserContactMapper;
+import com.anther.mappers.UserInfoMapper;
 import com.anther.service.UserContactApplyService;
 import com.anther.websocket.message.MessageHandler;
 import org.apache.commons.lang3.ArrayUtils;
@@ -17,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -35,6 +40,9 @@ public class UserContactApplyServiceImpl implements UserContactApplyService {
 
     @Resource
     private UserContactApplyMapper<UserContactApply, UserContactApplyQuery> userContactApplyMapper;
+
+    @Resource
+    private UserInfoMapper<UserInfo, UserInfoQuery> userInfoMapper;
 
     @Autowired
     private MessageHandler messageHandler;
@@ -119,8 +127,26 @@ public class UserContactApplyServiceImpl implements UserContactApplyService {
     }
 
     @Override
-    public List<UserContactApply> findListByParam(UserContactApplyQuery param) {
-        return userContactApplyMapper.selectList(param);
+    public List<ContactApplyDto> findListByParam(UserContactApplyQuery param) {
+        List<UserContactApply> applyList = userContactApplyMapper.selectList(param);
+        List<ContactApplyDto> result = new ArrayList<>();
+        for (UserContactApply apply : applyList) {
+            ContactApplyDto applyDto = new ContactApplyDto();
+            applyDto.setApplyUserId(apply.getApplyUserId());
+            UserInfo userInfo = userInfoMapper.selectByUserId(apply.getApplyUserId());
+            if (userInfo != null) {
+                applyDto.setApplyUserNickName(userInfo.getNickName()); // 假设getNickName()是获取昵称的方法
+            } else {
+                applyDto.setApplyUserNickName("未知用户"); // 用户不存在时的默认值
+            }
+            applyDto.setStatus(apply.getStatus());
+            applyDto.setApplyTime(apply.getLastApplyTime().toString());
+
+            result.add(applyDto);
+        }
+
+
+        return result;
     }
 
 

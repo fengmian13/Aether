@@ -1,6 +1,7 @@
 package com.anther.service;
 
 
+import com.anther.entity.dto.ContactApplyDto;
 import com.anther.entity.dto.TokenUserInfoDto;
 import com.anther.entity.po.UserContact;
 import com.anther.entity.po.UserContactApply;
@@ -16,6 +17,6 @@ public interface UserContactApplyService {
 
     void dealWithApply(String userId,String applyUserId,Integer status, String nickName);
 
-    List<UserContactApply> findListByParam(UserContactApplyQuery param);
+    List<ContactApplyDto> findListByParam(UserContactApplyQuery param);
 
 }

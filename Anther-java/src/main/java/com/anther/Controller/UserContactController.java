@@ -1,7 +1,9 @@
 package com.anther.Controller;
 
+import com.anther.entity.dto.ContactApplyDto;
 import com.anther.entity.dto.TokenUserInfoDto;
 import com.anther.entity.dto.UserContactControllerDto;
+import com.anther.entity.enums.IdEnum;
 import com.anther.entity.enums.UserContactStatusEnum;
 import com.anther.entity.po.UserContact;
 import com.anther.entity.po.UserContactApply;
@@ -11,6 +13,7 @@ import com.anther.entity.vo.ResponseVO;
 import com.anther.service.UserContactApplyService;
 import com.anther.service.UserContactService;
 import com.anther.service.UserInfoService;
+import com.anther.utils.IdTools;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -54,9 +57,16 @@ public class UserContactController extends ABaseController{
         //  1、userID和GroupID，分别加上前缀U和G
         //  2、通过获取contactId中的第一个字母判断是搜索用户还是群组
         //  3、分开调用不同的方式
-        // 用户增加地区，以及经纬度
-        UserContactControllerDto resultDto = userContactService.searchContact(tokenUserInfoDto.getUserId(), contactId);
-        return getSuccessResponseVO(resultDto);
+        //  用户增加地区，以及经纬度
+        if (IdEnum.USER_ID.equals(IdTools.getUserIdOrGroupIdById(contactId))){
+            UserContactControllerDto resultDto = userContactService.searchContact(tokenUserInfoDto.getUserId(), contactId);
+            return getSuccessResponseVO(resultDto);
+        }
+//        if (IdEnum.GROUP_ID.equals(IdTools.getUserIdOrGroupIdById(contactId))){
+//            UserContactControllerDto resultDto = userContactService.searchContact(tokenUserInfoDto.getUserId(), contactId);
+//        }
+        // TODO: 待补充群组搜索
+        return getSuccessResponseVO("无效的ID");
     }
 
     /**
@@ -74,6 +84,7 @@ public class UserContactController extends ABaseController{
         userContactApply.setReceiveUserId(receiveUserId);
         Integer status = userContactApplyService.saveContactApply(userContactApply);
         return getSuccessResponseVO(status);
+        // TODO:需要增加申请理由，给apply增加一个字段，来描述
     }
 
     /**
@@ -105,7 +116,7 @@ public class UserContactController extends ABaseController{
         contactQuery.setStatus(UserContactStatusEnum.FRIEND.getStatus());
         contactQuery.setOrderBy("last_update_time desc");
         contactQuery.setQueryUserInfo(true);
-        List<UserContact> userContactList = userContactService.findListByParam(contactQuery);
+        List<UserContactControllerDto> userContactList = userContactService.findListByParam(contactQuery);
         return getSuccessResponseVO(userContactList);
     }
 
@@ -124,7 +135,7 @@ public class UserContactController extends ABaseController{
         applyQuery.setReceiveUserId(tokenUserInfoDto.getUserId());
         applyQuery.setQueryUserInfo(true);
         applyQuery.setOrderBy("last_apply_time desc");
-        List<UserContactApply> applyList = this.userContactApplyService.findListByParam(applyQuery);
+        List<ContactApplyDto> applyList = this.userContactApplyService.findListByParam(applyQuery);
         return getSuccessResponseVO(applyList);
     }
 

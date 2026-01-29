@@ -22,6 +22,7 @@ import org.springframework.boot.autoconfigure.info.ProjectInfoAutoConfiguration;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -97,8 +98,27 @@ public class UserContactServiceImpl implements UserContactService {
     }
 
     @Override
-    public List<UserContact> findListByParam(UserContactQuery param) {
-        return this.userContactMapper.selectList(param);
+    public List<UserContactControllerDto> findListByParam(UserContactQuery param) {
+        List<UserContactControllerDto> resultList = new ArrayList<>();
+
+        List<UserContact> userContactList = this.userContactMapper.selectList(param);
+        for (UserContact userContact : userContactList) {
+            UserContactControllerDto resultDto = new UserContactControllerDto();
+            resultDto.setContactId(userContact.getContactId());
+            resultDto.setStatus(userContact.getStatus());
+
+            UserInfo userInfo = userInfoMapper.selectByUserId(userContact.getContactId());
+            if (userInfo != null) {
+                resultDto.setNickName(userInfo.getNickName());
+                resultDto.setSex(userInfo.getSex());
+            }else {
+                resultDto.setNickName("");
+                resultDto.setSex(null);
+            }
+
+            resultList.add(resultDto);
+        }
+        return resultList;
     }
 
     @Override
