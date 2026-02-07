@@ -15,4 +15,5 @@ public interface UserContactService {
     List<UserContactControllerDto> findListByParam(UserContactQuery query);
 
     void delContact(String userId, String contactId, Integer status);
+
 }

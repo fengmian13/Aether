@@ -3,15 +3,19 @@ package com.anther.Controller;
 import com.anther.entity.dto.ContactApplyDto;
 import com.anther.entity.dto.TokenUserInfoDto;
 import com.anther.entity.dto.UserContactControllerDto;
+import com.anther.entity.dto.UserGroupContactDto;
+import com.anther.entity.enums.ContactTypeEnum;
+import com.anther.entity.enums.GroupRoleEnum;
 import com.anther.entity.enums.IdEnum;
 import com.anther.entity.enums.UserContactStatusEnum;
-import com.anther.entity.po.UserContact;
 import com.anther.entity.po.UserContactApply;
 import com.anther.entity.query.UserContactApplyQuery;
 import com.anther.entity.query.UserContactQuery;
+import com.anther.entity.query.UserGroupQuery;
 import com.anther.entity.vo.ResponseVO;
 import com.anther.service.UserContactApplyService;
 import com.anther.service.UserContactService;
+import com.anther.service.UserGroupService;
 import com.anther.service.UserInfoService;
 import com.anther.utils.IdTools;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -38,6 +42,9 @@ public class UserContactController extends ABaseController{
 
     @Resource
     private UserContactApplyService userContactApplyService;
+
+    @Resource
+    private UserGroupService userGroupService;
 
 
     @Resource
@@ -108,16 +115,35 @@ public class UserContactController extends ABaseController{
      * @author 吴磊
      * @date 2025/12/26 15：03
      */
-    @RequestMapping("/loadContactUser")
-    public ResponseVO loadContactUser(){
-        TokenUserInfoDto tokenUserInfoDto = getTokenUserInfo();
-        UserContactQuery contactQuery = new UserContactQuery();
-        contactQuery.setUserId(tokenUserInfoDto.getUserId());
-        contactQuery.setStatus(UserContactStatusEnum.FRIEND.getStatus());
-        contactQuery.setOrderBy("last_update_time desc");
-        contactQuery.setQueryUserInfo(true);
-        List<UserContactControllerDto> userContactList = userContactService.findListByParam(contactQuery);
-        return getSuccessResponseVO(userContactList);
+    @RequestMapping("/loadContact")
+    public ResponseVO loadContact(@NotEmpty String contactType){
+        if (contactType == null){
+            return getSuccessResponseVO("无效的参数");
+        }
+        try {
+            ContactTypeEnum type = ContactTypeEnum.valueOf(contactType.toUpperCase());
+            if (ContactTypeEnum.GROUP.equals(type)){
+                //查找用户群组
+                TokenUserInfoDto tokenUserInfoDto = getTokenUserInfo();
+                UserGroupQuery userGroup = new UserGroupQuery();
+                userGroup.setUserId(tokenUserInfoDto.getUserId());
+                userGroup.setRoleId(GroupRoleEnum.MASTER.getType());
+                List<UserGroupContactDto> userGroupList = userGroupService.findListByQuery(userGroup);
+                return getSuccessResponseVO(userGroupList);
+            } else if (ContactTypeEnum.USER.equals(type)) {
+                TokenUserInfoDto tokenUserInfoDto = getTokenUserInfo();
+                UserContactQuery contactQuery = new UserContactQuery();
+                contactQuery.setUserId(tokenUserInfoDto.getUserId());
+                contactQuery.setStatus(UserContactStatusEnum.FRIEND.getStatus());
+                contactQuery.setOrderBy("last_update_time desc");
+                contactQuery.setQueryUserInfo(true);
+                List<UserContactControllerDto> userContactList = userContactService.findListByParam(contactQuery);
+                return getSuccessResponseVO(userContactList);
+            }
+        } catch (IllegalArgumentException e) {
+            return getSuccessResponseVO("无效的参数");
+        }
+        return getSuccessResponseVO("无效的参数");
     }
 
     /**
@@ -154,4 +180,16 @@ public class UserContactController extends ABaseController{
         return getSuccessResponseVO(null);
     }
 
+    /**
+     * @description: 拉黑
+     * @author 吴磊
+     * @date 2026/2/5 21:18
+     * @version 1.0
+     */
+    @RequestMapping("/addContact2BlackList")
+    public ResponseVO contactBlack(@NotEmpty String contactId, @NotNull Integer status) {
+        TokenUserInfoDto tokenUserInfoDto = getTokenUserInfo();
+        userContactService.delContact(tokenUserInfoDto.getUserId(), contactId, status);
+        return getSuccessResponseVO(null);
+    }
 }

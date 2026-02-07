@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.anther.mappers.GroupRoleInfoMapper">
+
+	<!--实体映射-->
+	<resultMap id="base_result_map" type="com.anther.entity.po.GroupRoleInfo">
+		<!---->
+		<result column="role_id" property="roleId"  />
+		<!---->
+		<result column="role" property="role"  />
+	</resultMap>
+
+
+	<!-- 通用查询结果列-->
+	<sql id="base_column_list">
+		 role_id,role
+	</sql>
+
+	<sql id="base_condition_filed">
+		<if test="query.roleId != null and query.roleId!=''">
+			 and  role_id = #{query.roleId}
+		</if>
+		<if test="query.role != null and query.role!=''">
+			 and  role = #{query.role}
+		</if>
+	</sql>
+
+	<!-- 通用查询条件列-->
+	<sql id="query_condition">
+		<where>
+			<include refid="base_condition_filed" />
+			<if test="query.roleIdFuzzy!= null  and query.roleIdFuzzy!=''">
+				 and  role_id like concat('%', #{query.roleIdFuzzy}, '%')
+			</if>
+			<if test="query.roleFuzzy!= null  and query.roleFuzzy!=''">
+				 and  role like concat('%', #{query.roleFuzzy}, '%')
+			</if>
+		</where>
+	</sql>
+
+	<!-- 查询集合-->
+	<select id="selectList" resultMap="base_result_map" >
+		 SELECT <include refid="base_column_list" /> FROM group_role_info <include refid="query_condition" />
+		 <if test="query.orderBy!=null">
+			 order by ${query.orderBy}
+		 </if>
+		 <if test="query.simplePage!=null">
+			 limit #{query.simplePage.start},#{query.simplePage.end}
+		 </if>
+	</select>
+
+	<!-- 查询数量-->
+	<select id="selectCount" resultType="java.lang.Integer" >
+		 SELECT count(1) FROM group_role_info <include refid="query_condition" />
+	</select>
+
+	<!-- 插入 （匹配有值的字段）-->
+	<insert id="insert" parameterType="com.anther.entity.po.GroupRoleInfo">
+		 INSERT INTO group_role_info
+		 <trim prefix="(" suffix=")" suffixOverrides="," >
+			<if test="bean.roleId != null">
+				 role_id,
+			</if>
+			<if test="bean.role != null">
+				 role,
+			</if>
+		 </trim>
+		 <trim prefix="values (" suffix=")" suffixOverrides="," >
+			<if test="bean.roleId!=null">
+				 #{bean.roleId},
+			</if>
+			<if test="bean.role!=null">
+				 #{bean.role},
+			</if>
+		 </trim>
+	</insert>
+
+	<!-- 插入或者更新 （匹配有值的字段）-->
+	<insert id="insertOrUpdate" parameterType="com.anther.entity.po.GroupRoleInfo">
+		 INSERT INTO group_role_info
+		 <trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="bean.roleId != null">
+				 role_id,
+			</if>
+			<if test="bean.role != null">
+				 role,
+			</if>
+		 </trim>
+		 <trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="bean.roleId!=null">
+				 #{bean.roleId},
+			</if>
+			<if test="bean.role!=null">
+				 #{bean.role},
+			</if>
+		 </trim>
+		 on DUPLICATE key update 
+		 <trim prefix="" suffix="" suffixOverrides=",">
+			<if test="bean.roleId!=null">
+				 role_id = VALUES(role_id),
+			</if>
+			<if test="bean.role!=null">
+				 role = VALUES(role),
+			</if>
+		 </trim>
+	</insert>
+
+	<!-- 添加 （批量插入）-->
+	<insert id="insertBatch" parameterType="com.anther.entity.po.GroupRoleInfo">
+		 INSERT INTO group_role_info(
+			 role_id,
+			 role
+		 )values
+		 <foreach collection="list" item="item" separator=",">
+			 (
+				 #{item.roleId},
+				 #{item.role}
+			 )
+		 </foreach>
+	</insert>
+
+	<!-- 批量新增修改 （批量插入）-->
+	<insert id="insertOrUpdateBatch" parameterType="com.anther.entity.po.GroupRoleInfo">
+		 INSERT INTO group_role_info(
+			 role_id,
+			 role
+		 )values
+		 <foreach collection="list" item="item" separator=",">
+			 (
+				 #{item.roleId},
+				 #{item.role}
+			 )
+		 </foreach>
+			on DUPLICATE key update 
+			role_id = VALUES(role_id),
+			role = VALUES(role)
+	</insert>
+
+	<!--多条件修改-->
+	<update id="updateByParam" parameterType="com.anther.entity.query.GroupRoleInfoQuery">
+		 UPDATE group_role_info
+ 		 <set> 
+			<if test="bean.roleId != null">
+				 role_id = #{bean.roleId},
+			</if>
+			<if test="bean.role != null">
+				 role = #{bean.role},
+			</if>
+ 		 </set>
+ 		 <include refid="query_condition" />
+	</update>
+
+	<!--多条件删除-->
+	<delete id="deleteByParam">
+		 delete from group_role_info
+ 		 <include refid="query_condition" />
+	</delete>
+
+	<!-- 根据RoleId修改-->
+	<update id="updateByRoleId" parameterType="com.anther.entity.po.GroupRoleInfo">
+		 UPDATE group_role_info
+ 		 <set> 
+			<if test="bean.role != null">
+				 role = #{bean.role},
+			</if>
+ 		 </set>
+ 		 where role_id=#{roleId}
+	</update>
+
+	<!-- 根据RoleId删除-->
+	<delete id="deleteByRoleId">
+		delete from group_role_info where role_id=#{roleId}
+	</delete>
+
+	<!-- 根据PrimaryKey获取对象-->
+	<select id="selectByRoleId" resultMap="base_result_map" >
+		select <include refid="base_column_list" /> from group_role_info where role_id=#{roleId}
+	</select>
+
+</mapper>

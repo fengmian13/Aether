@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.anther.mappers.GroupInfoMapper">
+
+	<!--实体映射-->
+	<resultMap id="base_result_map" type="com.anther.entity.po.GroupInfo">
+		<!---->
+		<result column="group_id" property="groupId"  />
+		<!--群组名-->
+		<result column="group_name" property="groupName"  />
+		<!--群组描述-->
+		<result column="group_Introducte" property="groupIntroducte"  />
+		<!--加入方式，是否需要管理员同意-->
+		<result column="join_type" property="joinType"  />
+	</resultMap>
+
+
+	<!-- 通用查询结果列-->
+	<sql id="base_column_list">
+		 group_id,group_name,group_Introducte,join_type
+	</sql>
+
+	<sql id="base_condition_filed">
+		<if test="query.groupId != null and query.groupId!=''">
+			 and  group_id = #{query.groupId}
+		</if>
+		<if test="query.groupName != null and query.groupName!=''">
+			 and  group_name = #{query.groupName}
+		</if>
+		<if test="query.groupIntroducte != null and query.groupIntroducte!=''">
+			 and  group_Introducte = #{query.groupIntroducte}
+		</if>
+		<if test="query.joinType != null and query.joinType!=''">
+			 and  join_type = #{query.joinType}
+		</if>
+	</sql>
+
+	<!-- 通用查询条件列-->
+	<sql id="query_condition">
+		<where>
+			<include refid="base_condition_filed" />
+			<if test="query.groupIdFuzzy!= null  and query.groupIdFuzzy!=''">
+				 and  group_id like concat('%', #{query.groupIdFuzzy}, '%')
+			</if>
+			<if test="query.groupNameFuzzy!= null  and query.groupNameFuzzy!=''">
+				 and  group_name like concat('%', #{query.groupNameFuzzy}, '%')
+			</if>
+			<if test="query.groupIntroducteFuzzy!= null  and query.groupIntroducteFuzzy!=''">
+				 and  group_Introducte like concat('%', #{query.groupIntroducteFuzzy}, '%')
+			</if>
+			<if test="query.joinTypeFuzzy!= null  and query.joinTypeFuzzy!=''">
+				 and  join_type like concat('%', #{query.joinTypeFuzzy}, '%')
+			</if>
+		</where>
+	</sql>
+
+<!--	 查询集合-->
+	<select id="selectList" resultMap="base_result_map" >
+		 SELECT <include refid="base_column_list" /> FROM group_info <include refid="query_condition" />
+		 <if test="query.orderBy!=null">
+			 order by ${query.orderBy}
+		 </if>
+		 <if test="query.simplePage!=null">
+			 limit #{query.simplePage.start},#{query.simplePage.end}
+		 </if>
+	</select>
+
+	<!-- 查询数量-->
+	<select id="selectCount" resultType="java.lang.Integer" >
+		 SELECT count(1) FROM group_info <include refid="query_condition" />
+	</select>
+
+	<!-- 插入 （匹配有值的字段）-->
+	<insert id="insert" parameterType="com.anther.entity.po.GroupInfo">
+		 INSERT INTO group_info
+		 <trim prefix="(" suffix=")" suffixOverrides="," >
+			<if test="bean.groupId != null">
+				 group_id,
+			</if>
+			<if test="bean.groupName != null">
+				 group_name,
+			</if>
+			<if test="bean.groupIntroducte != null">
+				 group_Introducte,
+			</if>
+			<if test="bean.joinType != null">
+				 join_type,
+			</if>
+		 </trim>
+		 <trim prefix="values (" suffix=")" suffixOverrides="," >
+			<if test="bean.groupId!=null">
+				 #{bean.groupId},
+			</if>
+			<if test="bean.groupName!=null">
+				 #{bean.groupName},
+			</if>
+			<if test="bean.groupIntroducte!=null">
+				 #{bean.groupIntroducte},
+			</if>
+			<if test="bean.joinType!=null">
+				 #{bean.joinType},
+			</if>
+		 </trim>
+	</insert>
+
+	<!-- 插入或者更新 （匹配有值的字段）-->
+	<insert id="insertOrUpdate" parameterType="com.anther.entity.po.GroupInfo">
+		 INSERT INTO group_info
+		 <trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="bean.groupId != null">
+				 group_id,
+			</if>
+			<if test="bean.groupName != null">
+				 group_name,
+			</if>
+			<if test="bean.groupIntroducte != null">
+				 group_Introducte,
+			</if>
+			<if test="bean.joinType != null">
+				 join_type,
+			</if>
+		 </trim>
+		 <trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="bean.groupId!=null">
+				 #{bean.groupId},
+			</if>
+			<if test="bean.groupName!=null">
+				 #{bean.groupName},
+			</if>
+			<if test="bean.groupIntroducte!=null">
+				 #{bean.groupIntroducte},
+			</if>
+			<if test="bean.joinType!=null">
+				 #{bean.joinType},
+			</if>
+		 </trim>
+		 on DUPLICATE key update 
+		 <trim prefix="" suffix="" suffixOverrides=",">
+			<if test="bean.groupId!=null">
+				 group_id = VALUES(group_id),
+			</if>
+			<if test="bean.groupName!=null">
+				 group_name = VALUES(group_name),
+			</if>
+			<if test="bean.groupIntroducte!=null">
+				 group_Introducte = VALUES(group_Introducte),
+			</if>
+			<if test="bean.joinType!=null">
+				 join_type = VALUES(join_type),
+			</if>
+		 </trim>
+	</insert>
+
+	<!-- 添加 （批量插入）-->
+	<insert id="insertBatch" parameterType="com.anther.entity.po.GroupInfo">
+		 INSERT INTO group_info(
+			 group_id,
+			 group_name,
+			 group_Introducte,
+			 join_type
+		 )values
+		 <foreach collection="list" item="item" separator=",">
+			 (
+				 #{item.groupId},
+				 #{item.groupName},
+				 #{item.groupIntroducte},
+				 #{item.joinType}
+			 )
+		 </foreach>
+	</insert>
+
+	<!-- 批量新增修改 （批量插入）-->
+	<insert id="insertOrUpdateBatch" parameterType="com.anther.entity.po.GroupInfo">
+		 INSERT INTO group_info(
+			 group_id,
+			 group_name,
+			 group_Introducte,
+			 join_type
+		 )values
+		 <foreach collection="list" item="item" separator=",">
+			 (
+				 #{item.groupId},
+				 #{item.groupName},
+				 #{item.groupIntroducte},
+				 #{item.joinType}
+			 )
+		 </foreach>
+			on DUPLICATE key update 
+			group_id = VALUES(group_id),
+			group_name = VALUES(group_name),
+			group_Introducte = VALUES(group_Introducte),
+			join_type = VALUES(join_type)
+	</insert>
+
+	<!--多条件修改-->
+	<update id="updateByParam" parameterType="com.anther.entity.query.GroupInfoQuery">
+		 UPDATE group_info
+ 		 <set> 
+			<if test="bean.groupId != null">
+				 group_id = #{bean.groupId},
+			</if>
+			<if test="bean.groupName != null">
+				 group_name = #{bean.groupName},
+			</if>
+			<if test="bean.groupIntroducte != null">
+				 group_Introducte = #{bean.groupIntroducte},
+			</if>
+			<if test="bean.joinType != null">
+				 join_type = #{bean.joinType},
+			</if>
+ 		 </set>
+ 		 <include refid="query_condition" />
+	</update>
+
+	<!--多条件删除-->
+	<delete id="deleteByParam">
+		 delete from group_info
+ 		 <include refid="query_condition" />
+	</delete>
+
+	<!-- 根据GroupId修改-->
+	<update id="updateByGroupId" parameterType="com.anther.entity.po.GroupInfo">
+		 UPDATE group_info
+ 		 <set> 
+			<if test="bean.groupName != null">
+				 group_name = #{bean.groupName},
+			</if>
+			<if test="bean.groupIntroducte != null">
+				 group_Introducte = #{bean.groupIntroducte},
+			</if>
+			<if test="bean.joinType != null">
+				 join_type = #{bean.joinType},
+			</if>
+ 		 </set>
+ 		 where group_id=#{groupId}
+	</update>
+
+	<!-- 根据GroupId删除-->
+	<delete id="deleteByGroupId">
+		delete from group_info where group_id=#{groupId}
+	</delete>
+
+	<!-- 根据PrimaryKey获取对象-->
+	<select id="selectByGroupId" resultMap="base_result_map" >
+		select <include refid="base_column_list" /> from group_info where group_id=#{groupId}
+	</select>
+
+	<select id="loadMyGroup" resultType="com.anther.entity.dto.UserGroupContactDto">
+		SELECT
+			ug.group_id   AS groupId,
+			gi.group_name AS groupName,
+			ug.role_id    AS groupRole
+		FROM user_group ug
+				INNER JOIN group_info gi
+				ON ug.group_id = gi.group_id
+		<where>
+			<if test="userId != null and userId != ''">
+				ug.user_id = #{userId}
+			</if>
+<!--			<if test="roleId != null and roleId != ''">-->
+<!--				AND ug.role_id = #{roleId}-->
+<!--			</if>-->
+		</where>
+	</select>
+
+
+	<select id="selectByGroupIdAndRoleId" resultMap="base_result_map" >
+		select
+			gi.group_id,
+			gi.group_name,
+			gi.group_Introducte,
+			gi.join_type,
+		    ug.user_id AS groupOwnerId
+		from group_info gi
+		left join user_group ug
+		on gi.group_id = ug.group_id
+		where gi.group_id=#{groupId}
+		and ug.role_id = #{roleId}
+	</select>
+</mapper>
