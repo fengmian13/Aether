@@ -1,9 +1,6 @@
 package com.anther.Controller;
 
-import com.anther.entity.dto.ContactApplyDto;
-import com.anther.entity.dto.TokenUserInfoDto;
-import com.anther.entity.dto.UserContactControllerDto;
-import com.anther.entity.dto.UserGroupContactDto;
+import com.anther.entity.dto.*;
 import com.anther.entity.enums.ContactTypeEnum;
 import com.anther.entity.enums.GroupRoleEnum;
 import com.anther.entity.enums.IdEnum;
@@ -13,10 +10,7 @@ import com.anther.entity.query.UserContactApplyQuery;
 import com.anther.entity.query.UserContactQuery;
 import com.anther.entity.query.UserGroupQuery;
 import com.anther.entity.vo.ResponseVO;
-import com.anther.service.UserContactApplyService;
-import com.anther.service.UserContactService;
-import com.anther.service.UserGroupService;
-import com.anther.service.UserInfoService;
+import com.anther.service.*;
 import com.anther.utils.IdTools;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -46,6 +40,9 @@ public class UserContactController extends ABaseController{
     @Resource
     private UserGroupService userGroupService;
 
+    @Resource
+    private GroupInfoService groupInfoService;
+
 
     @Resource
     private UserInfoService userInfoService;
@@ -69,10 +66,13 @@ public class UserContactController extends ABaseController{
             UserContactControllerDto resultDto = userContactService.searchContact(tokenUserInfoDto.getUserId(), contactId);
             return getSuccessResponseVO(resultDto);
         }
-//        if (IdEnum.GROUP_ID.equals(IdTools.getUserIdOrGroupIdById(contactId))){
-//            UserContactControllerDto resultDto = userContactService.searchContact(tokenUserInfoDto.getUserId(), contactId);
-//        }
-        // TODO: 待补充群组搜索
+        if (IdEnum.GROUP_ID.equals(IdTools.getUserIdOrGroupIdById(contactId))){
+            GroupInfoDto resultDto = groupInfoService.searchContact(contactId);
+            return getSuccessResponseVO(resultDto);
+        }
+        // TODO: 待补充群组搜索,
+        //  群组群组全部改为使用user_info表
+        //  修改群组搜索，确定群组申请的同意方案
         return getSuccessResponseVO("无效的ID");
     }
 

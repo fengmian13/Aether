@@ -5,10 +5,10 @@ import java.util.List;
 import javax.annotation.Resource;
 
 import com.anther.entity.constants.Constants;
+import com.anther.entity.dto.GroupInfoDto;
 import com.anther.entity.dto.TokenUserInfoDto;
 import com.anther.entity.dto.UserGroupContactDto;
-import com.anther.entity.enums.GroupJoinTypeEnum;
-import com.anther.entity.enums.GroupRoleEnum;
+import com.anther.entity.enums.*;
 import com.anther.entity.po.UserGroup;
 import com.anther.entity.query.UserGroupQuery;
 import com.anther.exception.BusinessException;
@@ -18,7 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.info.ProjectInfoAutoConfiguration;
 import org.springframework.stereotype.Service;
 
-import com.anther.entity.enums.PageSize;
 import com.anther.entity.query.GroupInfoQuery;
 import com.anther.entity.po.GroupInfo;
 import com.anther.entity.vo.PaginationResultVO;
@@ -222,5 +221,18 @@ public class GroupInfoServiceImpl implements GroupInfoService {
 			return 1;
 		}
 		return 0;
+	}
+
+	@Override
+	public GroupInfoDto searchContact(String contactId) {
+		GroupInfo groupInfo = this.groupInfoMapper.selectByGroupId(contactId);
+		if (groupInfo == null){
+			throw new BusinessException("出现错误！");
+		}
+		GroupInfoDto groupInfoDto = new GroupInfoDto();
+		groupInfoDto.setContactId(groupInfo.getGroupId());
+		groupInfoDto.setContactType(ContactTypeEnum.GROUP.getType());
+		groupInfoDto.setNickName(groupInfo.getGroupName());
+		return groupInfoDto;
 	}
 }

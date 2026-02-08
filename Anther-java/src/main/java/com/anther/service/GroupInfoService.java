@@ -2,6 +2,7 @@ package com.anther.service;
 
 import java.util.List;
 
+import com.anther.entity.dto.GroupInfoDto;
 import com.anther.entity.dto.UserGroupContactDto;
 import com.anther.entity.query.GroupInfoQuery;
 import com.anther.entity.po.GroupInfo;
@@ -79,4 +80,6 @@ public interface GroupInfoService {
 	Integer dissolutionGroup(String groupId, String userId);
 
 	Integer leaveGroup(String groupId, String userId);
+
+	GroupInfoDto searchContact(String contactId);
 }
