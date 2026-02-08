@@ -50,7 +50,7 @@ public class GroupInfoController extends ABaseController{
 
 
 	/**
-	 * 根据GroupId删除
+	 * 加载我的群组
 	 */
 	@RequestMapping("/loadMyGroup")
 	public ResponseVO loadMyGroup() {
@@ -64,4 +64,33 @@ public class GroupInfoController extends ABaseController{
 	public ResponseVO loadGroup(String groupId) {
 		return getSuccessResponseVO(groupInfoService.getGroupInfoByGroupId(groupId));
 	}
+
+	/**
+	 * @description: 删除群组
+	 * @author 吴磊
+	 * @date 2026/2/7 23:17
+	 * @version 1.0
+	 */
+	@RequestMapping("/dissolutionGroup")
+	public ResponseVO dissolutionGroup(String groupId) {
+		TokenUserInfoDto tokenUserInfoDto = getTokenUserInfo();
+		groupInfoService.dissolutionGroup(groupId, tokenUserInfoDto.getUserId());
+		return getSuccessResponseVO(null);
+	}
+
+
+	/**
+	 * @description: 退出群组
+	 * @param: null
+	 * @return:
+	 * @author 吴磊
+	 * @date: 2026/2/7 23:17
+	 */
+	@RequestMapping("/leaveGroup")
+	public ResponseVO leaveGroup(String groupId) {
+		TokenUserInfoDto tokenUserInfoDto = getTokenUserInfo();
+		groupInfoService.leaveGroup(groupId, tokenUserInfoDto.getUserId());
+		return getSuccessResponseVO(null);
+	}
+
 }

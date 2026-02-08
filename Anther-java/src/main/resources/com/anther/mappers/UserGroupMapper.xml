@@ -211,4 +211,30 @@
  		 <include refid="query_condition" />
 	</delete>
 
+
+	<select id="selectMasterByGroupIdAndRoleId"
+			resultMap="base_result_map" >
+		SELECT
+		<include refid="base_column_list" />
+		FROM user_group
+		<where>
+			<if test="query.groupId != null">
+				group_id = #{query.groupId}
+			</if>
+			<if test="query.roleId != null">
+				AND role_id = #{query.roleId}
+			</if>
+		</where>
+
+		<if test="query.orderBy != null">
+			ORDER BY ${query.orderBy}
+		</if>
+
+		<if test="query.simplePage != null">
+			LIMIT #{query.simplePage.start}, #{query.simplePage.end}
+		</if>
+	</select>
+
+
+
 </mapper>

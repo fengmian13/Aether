@@ -14,6 +14,8 @@ import com.anther.entity.query.UserGroupQuery;
 import com.anther.exception.BusinessException;
 import com.anther.mappers.UserGroupMapper;
 import com.anther.utils.IdTools;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.info.ProjectInfoAutoConfiguration;
 import org.springframework.stereotype.Service;
 
 import com.anther.entity.enums.PageSize;
@@ -37,6 +39,8 @@ public class GroupInfoServiceImpl implements GroupInfoService {
 
 	@Resource
 	private UserGroupMapper<UserGroup, UserGroupQuery> userGroupMapper;
+    @Autowired
+    private ProjectInfoAutoConfiguration projectInfoAutoConfiguration;
 
 
 	/**
@@ -180,5 +184,43 @@ public class GroupInfoServiceImpl implements GroupInfoService {
 	@Override
 	public List<UserGroupContactDto> loadMyGroup(String userId) {
 		return this.groupInfoMapper.loadMyGroup(userId,GroupRoleEnum.MASTER.getType());
+	}
+
+	@Override
+	public Integer dissolutionGroup(String groupId, String userId) {
+		UserGroupQuery userGroupQuery = new UserGroupQuery();
+		userGroupQuery.setGroupId(groupId);
+		userGroupQuery.setRoleId(GroupRoleEnum.MASTER.getType());
+		UserGroup userGroup = this.userGroupMapper.selectMasterByGroupIdAndRoleId(userGroupQuery);
+		System.out.println(userGroup);
+		if (userGroup != null && userGroup.getUserId().equals(userId)){
+			try {
+				this.groupInfoMapper.dissolutionGroup(groupId);//TODO 后续改为假删除
+				UserGroupQuery userGroupQuery1 = new UserGroupQuery();
+				userGroupQuery1.setGroupId(groupId);
+				this.userGroupMapper.deleteByParam(userGroupQuery1);
+				return 1;
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+		}
+		return 0;
+	}
+
+	@Override
+	public Integer leaveGroup(String groupId, String userId) {
+		UserGroupQuery userGroupQuery = new UserGroupQuery();
+		userGroupQuery.setGroupId(groupId);
+		userGroupQuery.setRoleId(GroupRoleEnum.MASTER.getType());
+		UserGroup userGroup = this.userGroupMapper.selectMasterByGroupIdAndRoleId(userGroupQuery);
+		if (userGroup != null && !userGroup.getUserId().equals(userId)){
+			UserGroupQuery userGroupQuery1 = new UserGroupQuery();
+			userGroupQuery1.setUserId(userId);
+			userGroupQuery1.setGroupId(groupId);
+			this.userGroupMapper.deleteByParam(userGroupQuery1);
+			return 1;
+		}
+		return 0;
 	}
 }

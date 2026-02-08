@@ -278,4 +278,8 @@
 		where gi.group_id=#{groupId}
 		and ug.role_id = #{roleId}
 	</select>
+
+	<delete id="dissolutionGroup">
+		delete from group_info where group_id=#{groupId}
+	</delete>
 </mapper>

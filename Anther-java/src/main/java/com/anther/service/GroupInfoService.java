@@ -76,5 +76,7 @@ public interface GroupInfoService {
 	 */
 	List<UserGroupContactDto> loadMyGroup(String query);
 
+	Integer dissolutionGroup(String groupId, String userId);
 
+	Integer leaveGroup(String groupId, String userId);
 }

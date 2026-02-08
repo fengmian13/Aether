@@ -35,5 +35,9 @@ public interface GroupInfoMapper<T,P> extends BaseMapper<T,P> {
 	 */
 	 T selectByGroupIdAndRoleId(@Param("groupId") String groupId, @Param("roleId") String roleId);
 
+	 /**
+	 * 解散群组
+	 */
+	 Integer dissolutionGroup(@Param("groupId") String groupId);
 
 }
