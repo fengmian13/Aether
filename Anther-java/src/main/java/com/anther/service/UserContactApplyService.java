@@ -19,4 +19,6 @@ public interface UserContactApplyService {
 
     List<ContactApplyDto> findListByParam(UserContactApplyQuery param);
 
+    List<ContactApplyDto> findGroupList(String userId);
+
 }

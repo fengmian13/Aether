@@ -162,6 +162,9 @@ public class UserContactController extends ABaseController{
         applyQuery.setQueryUserInfo(true);
         applyQuery.setOrderBy("last_apply_time desc");
         List<ContactApplyDto> applyList = this.userContactApplyService.findListByParam(applyQuery);
+        // 补充群组申请
+        List<ContactApplyDto> applyGroupList =this.userContactApplyService.findGroupList(tokenUserInfoDto.getUserId());
+        applyList.addAll(applyGroupList);
         return getSuccessResponseVO(applyList);
     }
 

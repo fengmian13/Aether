@@ -2,6 +2,7 @@ package com.anther.mappers;
 
 import com.anther.entity.dto.UserGroupContactDto;
 import com.anther.entity.po.UserGroup;
+import com.anther.entity.query.UserContactApplyQuery;
 import com.anther.entity.query.UserGroupQuery;
 import org.apache.ibatis.annotations.Param;
 

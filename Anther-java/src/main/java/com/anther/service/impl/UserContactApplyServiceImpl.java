@@ -6,13 +6,16 @@ import com.anther.entity.dto.TokenUserInfoDto;
 import com.anther.entity.enums.*;
 import com.anther.entity.po.UserContact;
 import com.anther.entity.po.UserContactApply;
+import com.anther.entity.po.UserGroup;
 import com.anther.entity.po.UserInfo;
 import com.anther.entity.query.UserContactApplyQuery;
 import com.anther.entity.query.UserContactQuery;
+import com.anther.entity.query.UserGroupQuery;
 import com.anther.entity.query.UserInfoQuery;
 import com.anther.exception.BusinessException;
 import com.anther.mappers.UserContactApplyMapper;
 import com.anther.mappers.UserContactMapper;
+import com.anther.mappers.UserGroupMapper;
 import com.anther.mappers.UserInfoMapper;
 import com.anther.service.UserContactApplyService;
 import com.anther.websocket.message.MessageHandler;
@@ -24,6 +27,7 @@ import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @param
@@ -43,6 +47,9 @@ public class UserContactApplyServiceImpl implements UserContactApplyService {
 
     @Resource
     private UserInfoMapper<UserInfo, UserInfoQuery> userInfoMapper;
+
+    @Resource
+    private UserGroupMapper<UserGroup, UserGroupQuery> userGroupMapper;
 
     @Autowired
     private MessageHandler messageHandler;
@@ -149,5 +156,30 @@ public class UserContactApplyServiceImpl implements UserContactApplyService {
         return result;
     }
 
-
+    @Override
+    public List<ContactApplyDto> findGroupList(String userId) {
+        // 查询拥有的群组
+        UserGroupQuery query = new UserGroupQuery();
+        query.setUserId(userId);
+        query.setRoleId(GroupRoleEnum.MASTER.getType());
+        List<UserGroup> groupIdList = userGroupMapper.selectList(query);
+        List<String> groupId = groupIdList.stream().map(UserGroup::getGroupId).collect(Collectors.toList());
+        // 根据群组Id查询申请
+        List<UserContactApply> queryDtoList = userContactApplyMapper.selectListByGroupId(groupId);
+        List<ContactApplyDto> applyDtoList = new ArrayList<>();
+        for (UserContactApply apply : queryDtoList) {
+            ContactApplyDto applyDto = new ContactApplyDto();
+            applyDto.setApplyUserId(apply.getApplyUserId());
+            applyDto.setApplyTime(apply.getLastApplyTime().toString());
+            applyDto.setStatus(apply.getStatus());
+            UserInfo userInfo = userInfoMapper.selectByUserId(apply.getApplyUserId());
+            if (userInfo != null) {
+                applyDto.setApplyUserNickName(userInfo.getNickName()); // 假设getNickName()是获取昵称的方法
+            } else {
+                applyDto.setApplyUserNickName("未知用户"); // 用户不存在时的默认值
+            }
+            applyDtoList.add(applyDto);
+        }
+        return applyDtoList;
+    }
 }

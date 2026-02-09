@@ -282,4 +282,24 @@
 		select <include refid="base_column_list" /> from user_contact_apply where apply_user_id=#{applyUserId} and receive_user_id=#{receiveUserId}
 	</select>
 
+	<select id="selectListByGroupId"
+			resultMap="base_result_map">
+
+		SELECT
+		apply_user_id,
+		receive_user_id,
+		last_apply_time,
+		status
+		FROM user_contact_apply
+		WHERE receive_user_id IN
+		<foreach collection="groupIdList"
+				 item="groupId"
+				 open="("
+				 close=")"
+				 separator=",">
+			#{groupId}
+		</foreach>
+
+	</select>
+
 </mapper>

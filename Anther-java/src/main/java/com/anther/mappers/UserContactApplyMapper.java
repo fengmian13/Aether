@@ -1,6 +1,10 @@
 package com.anther.mappers;
 
+import com.anther.entity.dto.ContactApplyDto;
+import com.anther.entity.po.UserContactApply;
 import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
  * 联系人申请 数据库操作接口
@@ -42,5 +46,8 @@ public interface UserContactApplyMapper<T,P> extends BaseMapper<T,P> {
 	 */
 	 T selectByApplyUserIdAndReceiveUserId(@Param("applyUserId") String applyUserId,@Param("receiveUserId") String receiveUserId);
 
+	List<UserContactApply> selectListByGroupId(
+			@Param("groupIdList") List<String> groupIdList
+	);
 
 }
