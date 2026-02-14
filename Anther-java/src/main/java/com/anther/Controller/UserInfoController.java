@@ -2,6 +2,7 @@ package com.anther.Controller;
 
 import java.util.List;
 
+import com.anther.entity.dto.TokenUserInfoDto;
 import com.anther.entity.query.UserInfoQuery;
 import com.anther.entity.po.UserInfo;
 import com.anther.entity.vo.ResponseVO;
@@ -63,6 +64,18 @@ public class UserInfoController extends ABaseController{
 	public ResponseVO getUserInfoByUserId(String userId) {
 		return getSuccessResponseVO(userInfoService.getUserInfoByUserId(userId));
 	}
+
+	 /**
+	  * @description: 获取用户信息
+	  * @author 吴磊
+	  * @date 2026/2/9 11:09
+	  * @version 1.0
+	  */
+	 @RequestMapping("/getUserInfo")
+	 public ResponseVO getUserInfo() {
+		 TokenUserInfoDto tokenUserInfoDto = getTokenUserInfo();
+		 return getSuccessResponseVO(userInfoService.getUserInfoByUserId(tokenUserInfoDto.getUserId()));
+	 }
 
 	/**
 	 * 根据UserId修改对象
