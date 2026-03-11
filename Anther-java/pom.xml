@@ -20,10 +20,10 @@
     <description>anther</description>
 
     <properties>
-        <java.version>1.8</java.version>
+        <java.version>17</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
         <skipTests>true</skipTests>
 
         <springboot.version>2.7.18</springboot.version>
@@ -38,7 +38,7 @@
         <commons.io.version>2.5</commons.io.version>
         <captcha.verion>1.6.2</captcha.verion>
         <netty.version>4.1.50.Final</netty.version>
-        <redisson.version>3.12.3</redisson.version>
+        <redisson.version>3.34.0</redisson.version>
         <lombok.version>1.18.34</lombok.version>
         <rabbitmq.version>5.14.2</rabbitmq.version>
     </properties>
@@ -162,6 +162,13 @@
             <groupId>com.rabbitmq</groupId>
             <artifactId>amqp-client</artifactId>
             <version>${rabbitmq.version}</version>
+        </dependency>
+
+        <!-- 添加 Nashorn JavaScript 引擎支持 -->
+        <dependency>
+            <groupId>org.openjdk.nashorn</groupId>
+            <artifactId>nashorn-core</artifactId>
+            <version>15.4</version>
         </dependency>
 
     </dependencies>

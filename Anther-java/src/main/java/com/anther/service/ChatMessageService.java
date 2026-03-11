@@ -2,6 +2,7 @@ package com.anther.service;
 
 import java.util.List;
 
+import com.anther.entity.dto.MessageSendDto;
 import com.anther.entity.query.ChatMessageQuery;
 import com.anther.entity.po.ChatMessage;
 import com.anther.entity.vo.PaginationResultVO;
@@ -68,5 +69,11 @@ public interface ChatMessageService {
 	 * 根据Id删除
 	 */
 	Integer deleteChatMessageById(Long id);
+
+	/**
+	 * 保存并发送聊天消息
+	 * @param messageDto 前端传来的消息对象
+	 */
+	void saveAndSendMessage(MessageSendDto messageDto);
 
 }

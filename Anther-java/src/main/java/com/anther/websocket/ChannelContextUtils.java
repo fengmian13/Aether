@@ -76,11 +76,11 @@ public class ChannelContextUtils {
         }
     }
 
-    private void sendMsg2User(MessageSendDto messageSendDto) {
-        if (messageSendDto.getReceiveUserId() == null) {
+    private void sendMsg2User(MessageSendDto messageSendDto, String targetUserId) {
+        if (targetUserId == null) {
             return;
         }
-        Channel channel = USER_CONTEXT_MAP.get(messageSendDto.getReceiveUserId());
+        Channel channel = USER_CONTEXT_MAP.get(targetUserId);
         if (channel == null) {
             return;
         }
@@ -89,7 +89,7 @@ public class ChannelContextUtils {
          * 强制下线特殊处理
          */
         if (MessageTypeEnum.FORCE_OFF_LINE.getType().equals(messageSendDto.getMessageType())) {
-            closeContext(messageSendDto.getReceiveUserId());
+            closeContext(targetUserId);
         }
     }
 
@@ -112,7 +112,13 @@ public class ChannelContextUtils {
      */
     public void sendMessage(MessageSendDto messageSendDto) {
         if (MessageSend2TypeEnum.USER.getType().equals(messageSendDto.getMessageSend2Type())) {
-            sendMsg2User(messageSendDto);
+            // 1. 发送给接收者
+            sendMsg2User(messageSendDto, messageSendDto.getReceiveUserId());
+
+            // 2. 发送给发送者自己（用于多端同步，避免发给自己时重复发送）
+            if (messageSendDto.getSendUserId() != null && !messageSendDto.getSendUserId().equals(messageSendDto.getReceiveUserId())) {
+                sendMsg2User(messageSendDto, messageSendDto.getSendUserId());
+            }
         } else {
             sendMsg2Group(messageSendDto);
         }

@@ -55,6 +55,19 @@ public class StringTools {
         return false;
     }
 
+    //将两人的 userId 排序后拼接：U0001 和 U0005 私聊，session_id 是 U0001_U0005。
+    public static String generatePrivateSessionId(String UserId, String receiveUserId) {
+        if(UserId == null || receiveUserId == null){
+            throw new BusinessException("UserId 不能为空");
+        }
+        if(UserId.compareTo(receiveUserId) < 0){
+            return UserId + "_" + receiveUserId;
+        } else {
+            return receiveUserId + "_" + UserId;
+        }
+    }
+
+
 //    TODO: 下面的这些方法的实现是怎么样的
 
     public static final String getRandomNumber(Integer count) {

@@ -9,6 +9,7 @@ import com.anther.entity.enums.MessageSend2TypeEnum;
 import com.anther.entity.enums.MessageTypeEnum;
 import com.anther.redis.RedisComponent;
 //import com.anther.service.MeetingInfoService;
+import com.anther.service.ChatMessageService;
 import com.anther.utils.JsonUtils;
 import com.anther.websocket.message.MessageHandler;
 import io.netty.channel.Channel;
@@ -41,6 +42,9 @@ public class HandlerWebSocket extends SimpleChannelInboundHandler<TextWebSocketF
 
 //    @Resource
 //    private MeetingInfoService meetingInfoService;
+
+    @Resource
+    private ChatMessageService chatMessageService;
 
     @Resource
     private RedisComponent redisComponet;
@@ -80,35 +84,42 @@ public class HandlerWebSocket extends SimpleChannelInboundHandler<TextWebSocketF
      * @throws Exception
      */
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, TextWebSocketFrame textWebSocketFrame) {
-        //接收心跳
-        logger.info("收到消息:{}", textWebSocketFrame.text());
-//        String text = textWebSocketFrame.text();
-//        if (Constants.PING.equals(text)) {
-//            Channel channel = ctx.channel();
-//            Attribute<String> attribute = channel.attr(AttributeKey.valueOf(channel.id().toString()));
-//            String userId = attribute.get();
-//            redisComponet.saveUserHeartBeat(userId);
-//            return;
-//        }
-//
-//        PeerConnectionDataDto dataDto = JsonUtils.convertJson2Obj(text, PeerConnectionDataDto.class);
-//        TokenUserInfoDto tokenUserInfoDto = redisComponet.getTokenUserInfoDto(dataDto.getToken());
-//        if (tokenUserInfoDto == null) {
-//            return;
-//        }
-//        MessageSendDto messageSendDto = new MessageSendDto();
-//        messageSendDto.setMessageType(MessageTypeEnum.PEER.getType());
-//
-//        PeerMessageDto peerMessageDto = new PeerMessageDto();
-//        peerMessageDto.setSignalType(dataDto.getSignalType());
-//        peerMessageDto.setSignalData(dataDto.getSignalData());
-//
-//        messageSendDto.setMessageContent(peerMessageDto);
-//        messageSendDto.setMeetingId(tokenUserInfoDto.getCurrentMeetingId());
-//        messageSendDto.setSendUserId(tokenUserInfoDto.getUserId());
-//        messageSendDto.setReceiveUserId(dataDto.getReceiveUserId());
-//        messageSendDto.setMessageSend2Type(MessageSend2TypeEnum.USER.getType());
-//        messageHandler.sendMessage(messageSendDto);
+    protected void channelRead0(ChannelHandlerContext ctx, TextWebSocketFrame textWebSocketFrame) throws Exception {
+        String text = textWebSocketFrame.text();
+        logger.info("收到客户端发来的 WebSocket 消息: {}", text);
+
+        //处理心跳解析报错刷屏
+        if ("heart beat".equals(text)) {
+            // 也可以给前端回一个心跳，防止前端超时断开
+            // ctx.channel().writeAndFlush(new TextWebSocketFrame("heart beat ok"));
+            return;
+        }
+
+        try {
+            // 1. 将收到的 JSON 字符串转换为 MessageSendDto
+            MessageSendDto messageSendDto = JsonUtils.convertJson2Obj(text, MessageSendDto.class);
+
+            // 2. 从 Channel 属性中获取当前用户的 userId (这是你在 HandlerTokenValidation 中鉴权通过时存入的)
+            Channel channel = ctx.channel();
+            Attribute<String> attribute = channel.attr(AttributeKey.valueOf(channel.id().toString()));
+            String sendUserId = attribute.get();
+
+            if (sendUserId == null) {
+                logger.warn("Channel 中未获取到合法的用户ID，忽略该消息");
+                return;
+            }
+
+            // 3. 将发送人的 userId 补充到消息体中
+            messageSendDto.setSendUserId(sendUserId);
+
+            // 4. 判断如果是普通的纯文本聊天消息，则交由业务层处理落库和分发
+            if (MessageTypeEnum.CHAT_TEXT_MESSAGE.getType().equals(messageSendDto.getMessageType())) {
+                logger.info("WebSocket 消息: 转Dto{}", messageSendDto);
+                chatMessageService.saveAndSendMessage(messageSendDto);
+            }
+
+        } catch (Exception e) {
+            logger.error("处理 WebSocket 消息时发生异常", e);
+        }
     }
 }
