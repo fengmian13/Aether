@@ -138,47 +138,4 @@ public class ChatMessageServiceImpl implements ChatMessageService {
 	public Integer deleteChatMessageById(Long id) {
 		return this.chatMessageMapper.deleteById(id);
 	}
-
-	public void saveAndSendMessage(MessageSendDto messageDto) {
-		String sendUserId = messageDto.getSendUserId();
-		String receiveUserId = messageDto.getReceiveUserId();
-		long currentTime = System.currentTimeMillis();
-
-		// 1. 构建数据库实体对象 ChatMessage
-		ChatMessage chatMessage = new ChatMessage();
-		chatMessage.setSendUserId(sendUserId);
-		chatMessage.setReceiveUserId(receiveUserId);
-
-		// 【修正点 1】修改为调用实体类现有的 setContent 和 setMsgType
-		chatMessage.setContent((String) messageDto.getMessageContent());
-		chatMessage.setMsgType(messageDto.getMessageType());
-
-		chatMessage.setSendTime(currentTime);
-		chatMessage.setStatus(1); // 1: 已发送状态
-		log.info("WebSocket 消息: chatMessage1:{}", chatMessage);
-
-		// 判断是私聊还是群聊，生成对应的 SessionId
-		if (MessageSend2TypeEnum.USER.getType().equals(messageDto.getMessageSend2Type())) {
-			chatMessage.setSessionType(1); // 1: 代表私聊
-			// 生成私聊专属 sessionId，保证两人的会话ID永远唯一且一致
-			String sessionId = generatePrivateSessionId(sendUserId, receiveUserId);
-			chatMessage.setSessionId(sessionId);
-		} else if (MessageSend2TypeEnum.GROUP.getType().equals(messageDto.getMessageSend2Type())) {
-			chatMessage.setSessionType(2); // 2: 代表群聊
-			chatMessage.setSessionId(receiveUserId); // 群聊 sessionId 直接使用 groupId
-		}
-
-		// 将消息入库保存 (持久化)
-		log.info("WebSocket 消息: chatMessage2持久化:{}", chatMessage);
-		chatMessageMapper.insert(chatMessage);
-
-		// 将补全后的数据回填到 DTO，准备用于跨节点广播
-		messageDto.setSessionId(chatMessage.getSessionId());
-		messageDto.setSendTime(currentTime);
-		//把数据库自动生成的自增主键 id 也带给前端，未来做“消息撤回”或“已读回执”用得上
-		messageDto.setMessageId(chatMessage.getId());
-
-		// 将消息发往消息中心 (Redis/RabbitMQ)，交由监听器消费后推送给真正的 WebSocket 客户端
-		messageHandler.sendMessage(messageDto);
-	}
 }

@@ -48,20 +48,4 @@ public class MessageHandler4Redis implements MessageHandler {
     public void destroy() {
         redissonClient.shutdown();
     }
-
-    public void onMessage(MessageSendDto messageSendDto) {
-        log.info("Redis 订阅收到消息，准备向本地 WebSocket 客户端分发: {}", messageSendDto);
-
-        // 如果是单聊（私聊）
-        if (MessageSend2TypeEnum.USER.getType().equals(messageSendDto.getMessageSend2Type())) {
-
-            // 尝试将消息推给接收者。
-            // 内部逻辑：检查接收者的 Channel 是否在本机 USER_CONTEXT_MAP 中。如果在，就用 WebSocket 刷出去。
-            channelContextUtils.sendMessage(messageSendDto);
-
-            // 【关键点】如果要做多端同步（比如我发了一条消息，我的手机端和电脑端都要能看到这句话）
-            // 需要把这条消息也推送给 "发送者" 自己！
-            channelContextUtils.sendMessage(messageSendDto);
-        }
-    }
 }

@@ -70,10 +70,4 @@ public interface ChatMessageService {
 	 */
 	Integer deleteChatMessageById(Long id);
 
-	/**
-	 * 保存并发送聊天消息
-	 * @param messageDto 前端传来的消息对象
-	 */
-	void saveAndSendMessage(MessageSendDto messageDto);
-
 }
