@@ -108,7 +108,7 @@ public class ChatSessionServiceImpl implements ChatSessionService {
 	 * 根据SessionId获取对象
 	 */
 	@Override
-	public ChatSession getChatSessionBySessionId(Long sessionId) {
+	public ChatSession getChatSessionBySessionId(String sessionId) {
 		return this.chatSessionMapper.selectBySessionId(sessionId);
 	}
 
@@ -116,7 +116,7 @@ public class ChatSessionServiceImpl implements ChatSessionService {
 	 * 根据SessionId修改
 	 */
 	@Override
-	public Integer updateChatSessionBySessionId(ChatSession bean, Long sessionId) {
+	public Integer updateChatSessionBySessionId(ChatSession bean, String sessionId) {
 		return this.chatSessionMapper.updateBySessionId(bean, sessionId);
 	}
 
@@ -124,7 +124,7 @@ public class ChatSessionServiceImpl implements ChatSessionService {
 	 * 根据SessionId删除
 	 */
 	@Override
-	public Integer deleteChatSessionBySessionId(Long sessionId) {
+	public Integer deleteChatSessionBySessionId(String sessionId) {
 		return this.chatSessionMapper.deleteBySessionId(sessionId);
 	}
 

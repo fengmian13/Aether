@@ -31,6 +31,11 @@ public class ChatMessage implements Serializable {
 	private String sendUserId;
 
 	/**
+	 * 发送人昵称
+	 */
+	private String sendUserNickName;
+
+	/**
 	 * 消息类型：1=文本, 2=图片, 3=视频, 4=文件, 5=撤回指令, 6=系统通知
 	 */
 	private Integer msgType;
@@ -101,6 +106,14 @@ public class ChatMessage implements Serializable {
 
 	public String getSendUserId(){
 		return this.sendUserId;
+	}
+
+	public void setSendUserNickName(String sendUserNickName) {
+		this.sendUserNickName = sendUserNickName;
+	}
+
+	public String getSendUserNickName() {
+		return this.sendUserNickName;
 	}
 
 	public void setMsgType(Integer msgType){

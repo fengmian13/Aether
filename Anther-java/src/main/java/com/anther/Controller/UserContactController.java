@@ -157,6 +157,7 @@ public class UserContactController extends ABaseController{
     @RequestMapping("/loadContactApply")
     public ResponseVO loadContactApply() {
         TokenUserInfoDto tokenUserInfoDto = getTokenUserInfo();
+        System.out.println(tokenUserInfoDto.getUserId());
         UserContactApplyQuery applyQuery = new UserContactApplyQuery();
         applyQuery.setReceiveUserId(tokenUserInfoDto.getUserId());
         applyQuery.setQueryUserInfo(true);

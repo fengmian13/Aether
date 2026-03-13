@@ -153,6 +153,19 @@ public class RedisComponent {
         return sysSettingDto;
     }
 
+    //获取用户联系人
+    public List<String> getUserContactList(String userId) {
+        return redisUtils.getQueueList(Constants.REDIS_KEY_USER_CONTACT + userId);
+    }
+
+    //添加用户联系人
+    public void addUserContact(String userId, String contactId) {
+        List<String> contactList = redisUtils.getQueueList(Constants.REDIS_KEY_USER_CONTACT + userId);
+        if (!contactList.contains(contactId)) {
+            redisUtils.lpush(Constants.REDIS_KEY_USER_CONTACT + userId, contactId, Constants.REDIS_KEY_TOKEN_EXPIRES);
+        }
+    }
+
 
 //    /**
 //     * 加入会议

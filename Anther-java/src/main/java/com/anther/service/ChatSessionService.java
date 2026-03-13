@@ -55,19 +55,19 @@ public interface ChatSessionService {
 	/**
 	 * 根据SessionId查询对象
 	 */
-	ChatSession getChatSessionBySessionId(Long sessionId);
+	ChatSession getChatSessionBySessionId(String sessionId);
 
 
 	/**
 	 * 根据SessionId修改
 	 */
-	Integer updateChatSessionBySessionId(ChatSession bean,Long sessionId);
+	Integer updateChatSessionBySessionId(ChatSession bean,String sessionId);
 
 
 	/**
 	 * 根据SessionId删除
 	 */
-	Integer deleteChatSessionBySessionId(Long sessionId);
+	Integer deleteChatSessionBySessionId(String sessionId);
 
 
 	/**

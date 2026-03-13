@@ -17,6 +17,7 @@ import com.anther.mappers.UserContactApplyMapper;
 import com.anther.mappers.UserContactMapper;
 import com.anther.mappers.UserGroupMapper;
 import com.anther.mappers.UserInfoMapper;
+import com.anther.redis.RedisComponent;
 import com.anther.service.UserContactApplyService;
 import com.anther.websocket.message.MessageHandler;
 import org.apache.commons.lang3.ArrayUtils;
@@ -53,6 +54,8 @@ public class UserContactApplyServiceImpl implements UserContactApplyService {
 
     @Autowired
     private MessageHandler messageHandler;
+    @Autowired
+    private RedisComponent redisComponent;
 
 
     @Override
@@ -116,11 +119,17 @@ public class UserContactApplyServiceImpl implements UserContactApplyService {
             userContact.setUserId(userId);
             userContact.setContactId(applyUserId);
             userContactMapper.insertOrUpdate(userContact);
+
         }
+        //将
 
         UserContactApply updateApply = new UserContactApply();
         updateApply.setStatus(applyStatus.getStatus());
         userContactApplyMapper.updateByApplyId(updateApply, apply.getApplyId());
+
+        //给用户添加联系人
+        redisComponent.addUserContact(applyUserId, userId);
+        redisComponent.addUserContact(userId, applyUserId);
 
         // 发消息
         MessageSendDto sendDto = new MessageSendDto();
@@ -163,10 +172,15 @@ public class UserContactApplyServiceImpl implements UserContactApplyService {
         query.setUserId(userId);
         query.setRoleId(GroupRoleEnum.MASTER.getType());
         List<UserGroup> groupIdList = userGroupMapper.selectList(query);
+        List<ContactApplyDto> applyDtoList = new ArrayList<>();
+        //如果没有数据，则返回空
+        if (groupIdList.isEmpty()) {
+            return applyDtoList;
+        }
         List<String> groupId = groupIdList.stream().map(UserGroup::getGroupId).collect(Collectors.toList());
         // 根据群组Id查询申请
         List<UserContactApply> queryDtoList = userContactApplyMapper.selectListByGroupId(groupId);
-        List<ContactApplyDto> applyDtoList = new ArrayList<>();
+
         for (UserContactApply apply : queryDtoList) {
             ContactApplyDto applyDto = new ContactApplyDto();
             applyDto.setApplyUserId(apply.getApplyUserId());

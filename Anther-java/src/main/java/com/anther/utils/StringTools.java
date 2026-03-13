@@ -3,9 +3,16 @@ import com.anther.entity.constants.Constants;
 import com.anther.exception.BusinessException;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 
+import javax.xml.crypto.Data;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Arrays;
+import java.util.Date;
 
 
 public class StringTools {
@@ -104,4 +111,35 @@ public class StringTools {
     public static final String getMeetingNoOrMeetingId() {
         return StringTools.getRandomNumber(Constants.LENGTH_10);
     }
+
+    public static String cleanHtmlTag(String content) {
+        if (isEmpty(content)) {
+            return content;
+        }
+        content = content.replace("<", "&lt;");
+        content = content.replace("\r\n", "<br>");
+        content = content.replace("\n", "<br>");
+        return content;
+    }
+    public static String resetMessageContent(String content) {
+        content = cleanHtmlTag(content);
+        return content;
+    }
+
+    public static final String getChatSessionId4User(String[] userIds) {
+        Arrays.sort(userIds);
+        return encodeByMD5(StringUtils.join(userIds, ""));
+    }
+
+    public static final String getChatSessionId4Group(String groupId) {
+        return encodeByMD5(groupId);
+    }
+
+    public static Date getLocalDateTimeFromLong(Long timeMillis) {
+        if (timeMillis == null) {
+            return null;
+        }
+        return new Date(timeMillis);
+    }
+
 }

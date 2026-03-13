@@ -60,7 +60,7 @@ public class ChatSessionController extends ABaseController{
 	 * 根据SessionId查询对象
 	 */
 	@RequestMapping("/getChatSessionBySessionId")
-	public ResponseVO getChatSessionBySessionId(Long sessionId) {
+	public ResponseVO getChatSessionBySessionId(String sessionId) {
 		return getSuccessResponseVO(chatSessionService.getChatSessionBySessionId(sessionId));
 	}
 
@@ -68,7 +68,7 @@ public class ChatSessionController extends ABaseController{
 	 * 根据SessionId修改对象
 	 */
 	@RequestMapping("/updateChatSessionBySessionId")
-	public ResponseVO updateChatSessionBySessionId(ChatSession bean,Long sessionId) {
+	public ResponseVO updateChatSessionBySessionId(ChatSession bean,String sessionId) {
 		chatSessionService.updateChatSessionBySessionId(bean,sessionId);
 		return getSuccessResponseVO(null);
 	}
@@ -77,7 +77,7 @@ public class ChatSessionController extends ABaseController{
 	 * 根据SessionId删除
 	 */
 	@RequestMapping("/deleteChatSessionBySessionId")
-	public ResponseVO deleteChatSessionBySessionId(Long sessionId) {
+	public ResponseVO deleteChatSessionBySessionId(String sessionId) {
 		chatSessionService.deleteChatSessionBySessionId(sessionId);
 		return getSuccessResponseVO(null);
 	}

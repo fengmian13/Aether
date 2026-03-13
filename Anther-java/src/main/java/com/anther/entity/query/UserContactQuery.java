@@ -29,6 +29,11 @@ public class UserContactQuery extends BaseParam {
 	private Integer status;
 
 	/**
+	 * 联系人类型 0:好友 1:群组
+	 */
+	private Integer contactType;
+
+	/**
 	 * 最后更新时间
 	 */
 	private String lastUpdateTime;
@@ -37,6 +42,15 @@ public class UserContactQuery extends BaseParam {
 
 	private String lastUpdateTimeEnd;
 
+
+
+	public void setContactType(Integer contactType) {
+		this.contactType = contactType;
+	}
+
+	public Integer getContactType() {
+		return this.contactType;
+	}
 
 	public void setUserId(String userId){
 		this.userId = userId;

@@ -100,4 +100,33 @@ public class RedisUtils<V> {
     public List<V> hvals(String key) {
         return (List<V>) redisTemplate.opsForHash().values(key);
     }
+
+    public List<V> getQueueList(String key) {
+        return redisTemplate.opsForList().range(key, 0, -1);
+    }
+
+    public boolean expire(String key, long time) {
+        try {
+            if (time > 0) {
+                redisTemplate.expire(key, time, TimeUnit.SECONDS);
+            }
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean lpush(String key, V value, long time) {
+        try {
+            redisTemplate.opsForList().leftPush(key, value);
+            if (time > 0) {
+                expire(key, time);
+            }
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }
