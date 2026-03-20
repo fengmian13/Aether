@@ -102,9 +102,9 @@ public class UserContactController extends ABaseController{
      * @date 2025/12/26 15：03
      */
     @RequestMapping("/dealWithApply")
-    public ResponseVO dealWithApply(@NotEmpty String applyUserId , @NotEmpty Integer status){
+    public ResponseVO dealWithApply(@NotEmpty String applyUserId,@NotEmpty String receiveUserId , @NotEmpty Integer status){
         TokenUserInfoDto tokenUserInfoDto = getTokenUserInfo();
-        userContactApplyService.dealWithApply(tokenUserInfoDto.getUserId(), applyUserId, status, tokenUserInfoDto.getNickName());
+        userContactApplyService.dealWithApply(tokenUserInfoDto.getUserId(), applyUserId, status, tokenUserInfoDto.getNickName(), receiveUserId);
         return getSuccessResponseVO(null);
     }
 
@@ -127,8 +127,11 @@ public class UserContactController extends ABaseController{
                 TokenUserInfoDto tokenUserInfoDto = getTokenUserInfo();
                 UserGroupQuery userGroup = new UserGroupQuery();
                 userGroup.setUserId(tokenUserInfoDto.getUserId());
-                userGroup.setRoleId(GroupRoleEnum.MASTER.getType());
+//                userGroup.setRoleId(GroupRoleEnum.MASTER.getType());//改为前端判断03（群主）
                 List<UserGroupContactDto> userGroupList = userGroupService.findListByQuery(userGroup);
+
+                // 查找群组
+
                 return getSuccessResponseVO(userGroupList);
             } else if (ContactTypeEnum.USER.equals(type)) {
                 TokenUserInfoDto tokenUserInfoDto = getTokenUserInfo();

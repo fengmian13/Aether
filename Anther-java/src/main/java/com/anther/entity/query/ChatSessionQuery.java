@@ -12,7 +12,7 @@ public class ChatSessionQuery extends BaseParam {
 	/**
 	 * 会话ID，唯一标识一条会话记录
 	 */
-	private Long sessionId;
+	private String sessionId;
 
 	/**
 	 * 当前用户ID，表示该会话属于哪个用户
@@ -73,11 +73,11 @@ public class ChatSessionQuery extends BaseParam {
 	private String updateTimeEnd;
 
 
-	public void setSessionId(Long sessionId){
+	public void setSessionId(String sessionId){
 		this.sessionId = sessionId;
 	}
 
-	public Long getSessionId(){
+	public String getSessionId(){
 		return this.sessionId;
 	}
 

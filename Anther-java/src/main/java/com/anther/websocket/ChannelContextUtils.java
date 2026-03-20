@@ -43,6 +43,8 @@ public class ChannelContextUtils {
 
     public static final ConcurrentMap<String, ChannelGroup> MEETING_ROOM_CONTEXT_MAP = new ConcurrentHashMap();
 
+    public static final ConcurrentMap<String, ChannelGroup> GROUP_CONTEXT_MAP = new ConcurrentHashMap();
+
 
     private void sendMsg2Group(MessageSendDto messageSendDto) {
         if (messageSendDto.getMeetingId() == null) {
@@ -189,5 +191,22 @@ public class ChannelContextUtils {
         if (channel == null) {
             group.add(context);
         }
+    }
+
+    private void add2Group(String groupId, Channel context) {
+        ChannelGroup group = GROUP_CONTEXT_MAP.get(groupId);
+        if (group == null) {
+            group = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
+            GROUP_CONTEXT_MAP.put(groupId, group);
+        }
+        if (context == null) {
+            return;
+        }
+        group.add(context);
+    }
+
+    public void addUser2Group(String userId, String groupId) {
+        Channel channel = USER_CONTEXT_MAP.get(userId);
+        add2Group(groupId, channel);
     }
 }

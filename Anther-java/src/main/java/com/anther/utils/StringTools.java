@@ -74,6 +74,11 @@ public class StringTools {
         }
     }
 
+    // 获取字符串的第一个字符
+    public static String getPreviousChar(String str) {
+        return str.substring(0, 1);
+    }
+
 
 //    TODO: 下面的这些方法的实现是怎么样的
 

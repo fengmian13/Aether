@@ -16,4 +16,14 @@ public interface UserContactService {
 
     void delContact(String userId, String contactId, Integer status);
 
+    /**
+     * 添加联系人
+     *
+     * @param applyUserId
+     * @param receiveUserId
+     * @param contactType
+     * @param applyInfo
+     */
+    void addContact(String applyUserId, String receiveUserId, Integer contactType, String applyInfo);
+
 }

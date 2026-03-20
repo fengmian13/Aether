@@ -6,7 +6,8 @@ import com.anther.utils.StringTools;
 public enum UserContactStatusEnum {
     FRIEND(1, "好友"),
     DEL(2, "已删除好友"),
-    BLACKLIST(3, "已拉黑好友");
+    BLACKLIST(3, "已拉黑好友"),
+    BLACKLIST_BE(4, "被好友拉黑");
 
     private Integer status;
 

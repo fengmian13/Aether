@@ -36,6 +36,28 @@ public class MessageSendDto<T> implements Serializable {
     private Long fileSize;
     private String sessionId;
 
+    //群员
+    private Integer memberCount;
+
+    //扩展信息
+    private T extendData;
+
+    public Integer getMemberCount() {
+        return memberCount;
+    }
+
+    public void setMemberCount(Integer memberCount) {
+        this.memberCount = memberCount;
+    }
+
+    public T getExtendData() {
+        return extendData;
+    }
+
+    public void setExtendData(T extendData) {
+        this.extendData = extendData;
+    }
+
     public String getSessionId() {
         return sessionId;
     }

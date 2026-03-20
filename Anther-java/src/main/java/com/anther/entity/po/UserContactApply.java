@@ -26,6 +26,16 @@ public class UserContactApply implements Serializable {
 	private String receiveUserId;
 
 	/**
+	 * 状态0:待处理 1:已同意  2:已拒绝 3:已拉黑
+	 */
+	private Integer contactType;
+
+	/**
+	 * 联系人群组ID
+	 */
+	private String contactId;
+
+	/**
 	 * 最后申请时间
 	 */
 	private Long lastApplyTime;
@@ -35,6 +45,55 @@ public class UserContactApply implements Serializable {
 	 */
 	private Integer status;
 
+	/**
+	 * 申请信息
+	 */
+	private String applyInfo;
+
+
+	private String contactName;
+
+	private String statusName;
+
+	public Integer getContactType() {
+		return contactType;
+	}
+
+	public void setContactType(Integer contactType) {
+		this.contactType = contactType;
+	}
+
+	public String getContactId() {
+		return contactId;
+	}
+
+	public void setContactId(String contactId) {
+		this.contactId = contactId;
+	}
+
+	public String getApplyInfo() {
+		return applyInfo;
+	}
+
+	public void setApplyInfo(String applyInfo) {
+		this.applyInfo = applyInfo;
+	}
+
+	public String getContactName() {
+		return contactName;
+	}
+
+	public void setContactName(String contactName) {
+		this.contactName = contactName;
+	}
+
+	public String getStatusName() {
+		return statusName;
+	}
+
+	public void setStatusName(String statusName) {
+		this.statusName = statusName;
+	}
 
 	public void setApplyId(Integer applyId){
 		this.applyId = applyId;

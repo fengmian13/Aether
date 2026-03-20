@@ -15,7 +15,7 @@ public interface UserContactApplyService {
 
     Integer saveContactApply(UserContactApply userContactApply);
 
-    void dealWithApply(String userId,String applyUserId,Integer status, String nickName);
+    void dealWithApply(String userId,String applyUserId,Integer status, String nickName, String receiveUserId);
 
     List<ContactApplyDto> findListByParam(UserContactApplyQuery param);
 

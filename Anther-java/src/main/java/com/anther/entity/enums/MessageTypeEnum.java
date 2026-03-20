@@ -19,8 +19,8 @@ public enum MessageTypeEnum {
     ADD_FRIEND(14, "", "添加好友打招呼消息"),
     GROUP_CREATE(15, "群组已经创建好，可以和好友一起畅聊了", "群创建成功"),
     MEDIA_CHAT(16, "", "媒体文件"),
-
-    ;
+    ADD_FRIEND_SELF(17, "", "添加好友打招呼消息发送给自己"),
+    ADD_GROUP(18, "%s加入了群组", "加入群聊");
 
     private Integer type;
     private String initMessage;

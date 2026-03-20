@@ -13,6 +13,7 @@ import com.anther.entity.po.UserGroup;
 import com.anther.entity.query.UserGroupQuery;
 import com.anther.exception.BusinessException;
 import com.anther.mappers.UserGroupMapper;
+import com.anther.redis.RedisComponent;
 import com.anther.utils.IdTools;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.info.ProjectInfoAutoConfiguration;
@@ -40,6 +41,8 @@ public class GroupInfoServiceImpl implements GroupInfoService {
 	private UserGroupMapper<UserGroup, UserGroupQuery> userGroupMapper;
     @Autowired
     private ProjectInfoAutoConfiguration projectInfoAutoConfiguration;
+    @Autowired
+    private RedisComponent redisComponent;
 
 
 	/**
@@ -101,6 +104,7 @@ public class GroupInfoServiceImpl implements GroupInfoService {
 		userGroup.setGroupId(id);
 		userGroup.setRoleId(GroupRoleEnum.MASTER.getType());
 		userGroupMapper.insert(userGroup);
+		redisComponent.addUserContact(userId, id);
 		return 1;
 	}
 

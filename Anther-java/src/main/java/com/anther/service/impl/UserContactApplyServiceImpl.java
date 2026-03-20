@@ -19,6 +19,8 @@ import com.anther.mappers.UserGroupMapper;
 import com.anther.mappers.UserInfoMapper;
 import com.anther.redis.RedisComponent;
 import com.anther.service.UserContactApplyService;
+import com.anther.service.UserContactService;
+import com.anther.utils.StringTools;
 import com.anther.websocket.message.MessageHandler;
 import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,7 +59,11 @@ public class UserContactApplyServiceImpl implements UserContactApplyService {
     @Autowired
     private RedisComponent redisComponent;
 
+    @Resource
+    private UserContactService userContactService;
 
+
+    // TODO:补全群组
     @Override
     public Integer saveContactApply(UserContactApply userContactApply) {
         // 判断是否被拉黑
@@ -96,50 +102,57 @@ public class UserContactApplyServiceImpl implements UserContactApplyService {
         return UserContactApplyStatusEnum.INIT.getStatus();
     }
 
+    /**
+     * 处理申请
+     * @param userId: 处理人id
+     * @param applyUserId: 申请人id
+     * @param status： 处理状态
+     * @param nickName： 处理人昵称
+     */
     @Override
-    public void dealWithApply(String userId, String applyUserId, Integer status, String nickName){
+    public void dealWithApply(String userId, String applyUserId, Integer status, String nickName, String receiveUserId){
         // 获取申请的处理状态
         UserContactApplyStatusEnum applyStatus = UserContactApplyStatusEnum.getByStatus(status);
         if(applyStatus == null || applyStatus == UserContactApplyStatusEnum.INIT){
             throw new BusinessException(ResponseCodeEnum.CODE_600);
         }
         // 判断申请是否存在
-        UserContactApply apply = userContactApplyMapper.selectByApplyUserIdAndReceiveUserId(applyUserId, userId);
+        UserContactApply apply = userContactApplyMapper.selectByApplyUserIdAndReceiveUserId(applyUserId, receiveUserId);
+        System.out.println("G".equals(StringTools.getPreviousChar(apply.getReceiveUserId())));
+        if("G".equals(StringTools.getPreviousChar(apply.getReceiveUserId())) ){
+            apply.setContactType(UserContactTypeEnum.GROUP.getType());
+        }else {
+            apply.setContactType(UserContactTypeEnum.USER.getType());
+        }
         if (apply == null){
             throw new BusinessException(ResponseCodeEnum.CODE_600);
         }
-        if (UserContactApplyStatusEnum.PASS.equals(applyStatus)){
-            Date now = new Date();
-            UserContact userContact = new UserContact();
-            userContact.setUserId(applyUserId);
-            userContact.setContactId(userId);
-            userContact.setStatus(UserContactStatusEnum.FRIEND.getStatus());
-            userContact.setLastUpdateTime(now);
-            userContactMapper.insertOrUpdate(userContact);
-            userContact.setUserId(userId);
-            userContact.setContactId(applyUserId);
-            userContactMapper.insertOrUpdate(userContact);
-
-        }
-        //将
 
         UserContactApply updateApply = new UserContactApply();
         updateApply.setStatus(applyStatus.getStatus());
+        updateApply.setLastApplyTime(System.currentTimeMillis());
         userContactApplyMapper.updateByApplyId(updateApply, apply.getApplyId());
 
-        //给用户添加联系人
-        redisComponent.addUserContact(applyUserId, userId);
-        redisComponent.addUserContact(userId, applyUserId);
+        //给用户添加联系人// 发消息，改到useContactService中
+        if (UserContactApplyStatusEnum.PASS.equals(applyStatus)){
+            userContactService.addContact(apply.getApplyUserId(), apply.getReceiveUserId(), apply.getContactType(), apply.getApplyInfo());
+            return;
+        }
 
-        // 发消息
-        MessageSendDto sendDto = new MessageSendDto();
-        sendDto.setMessageSend2Type(MessageSend2TypeEnum.USER.getType());
-        sendDto.setMessageType(MessageTypeEnum.USER_CONTACT_DEAL_WITH.getType());
-        sendDto.setReceiveUserId(applyUserId);
-        sendDto.setSendUserId(userId);
-        sendDto.setSendUserNickName(nickName);
-        sendDto.setMessageContent(status);
-        messageHandler.sendMessage(sendDto);
+        //拉黑
+        if (UserContactApplyStatusEnum.BLACKLIST == applyStatus) {
+            //拉黑 将接收人添加到申请人的联系人中，标记申请人被拉黑
+            Date curDate = new Date();
+            UserContact userContact = new UserContact();
+            userContact.setUserId(apply.getApplyUserId());
+            userContact.setContactId(apply.getContactId());
+            userContact.setContactType(apply.getContactType());
+            userContact.setCreateTime(curDate);
+            userContact.setStatus(UserContactStatusEnum.BLACKLIST_BE.getStatus());
+            userContact.setLastUpdateTime(curDate);
+            userContactMapper.insertOrUpdate(userContact);
+            return;
+        }
     }
 
     @Override
@@ -149,6 +162,7 @@ public class UserContactApplyServiceImpl implements UserContactApplyService {
         for (UserContactApply apply : applyList) {
             ContactApplyDto applyDto = new ContactApplyDto();
             applyDto.setApplyUserId(apply.getApplyUserId());
+            applyDto.setReceiveUserId(apply.getReceiveUserId());
             UserInfo userInfo = userInfoMapper.selectByUserId(apply.getApplyUserId());
             if (userInfo != null) {
                 applyDto.setApplyUserNickName(userInfo.getNickName()); // 假设getNickName()是获取昵称的方法
@@ -177,6 +191,7 @@ public class UserContactApplyServiceImpl implements UserContactApplyService {
         if (groupIdList.isEmpty()) {
             return applyDtoList;
         }
+        System.out.println("groupIdList:"+applyDtoList);
         List<String> groupId = groupIdList.stream().map(UserGroup::getGroupId).collect(Collectors.toList());
         // 根据群组Id查询申请
         List<UserContactApply> queryDtoList = userContactApplyMapper.selectListByGroupId(groupId);
@@ -184,6 +199,7 @@ public class UserContactApplyServiceImpl implements UserContactApplyService {
         for (UserContactApply apply : queryDtoList) {
             ContactApplyDto applyDto = new ContactApplyDto();
             applyDto.setApplyUserId(apply.getApplyUserId());
+            applyDto.setReceiveUserId(apply.getReceiveUserId());
             applyDto.setApplyTime(apply.getLastApplyTime().toString());
             applyDto.setStatus(apply.getStatus());
             UserInfo userInfo = userInfoMapper.selectByUserId(apply.getApplyUserId());
