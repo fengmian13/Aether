@@ -5,12 +5,16 @@ import com.anther.entity.enums.ContactTypeEnum;
 import com.anther.entity.enums.GroupRoleEnum;
 import com.anther.entity.enums.IdEnum;
 import com.anther.entity.enums.UserContactStatusEnum;
+import com.anther.entity.po.UserContact;
 import com.anther.entity.po.UserContactApply;
+import com.anther.entity.po.UserInfo;
+import com.anther.entity.vo.UserInfoVO;
 import com.anther.entity.query.UserContactApplyQuery;
 import com.anther.entity.query.UserContactQuery;
 import com.anther.entity.query.UserGroupQuery;
 import com.anther.entity.vo.ResponseVO;
 import com.anther.service.*;
+import com.anther.utils.CopyTools;
 import com.anther.utils.IdTools;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -198,5 +202,20 @@ public class UserContactController extends ABaseController{
         TokenUserInfoDto tokenUserInfoDto = getTokenUserInfo();
         userContactService.delContact(tokenUserInfoDto.getUserId(), contactId, status);
         return getSuccessResponseVO(null);
+    }
+
+    @RequestMapping("/getContactInfo")
+    public ResponseVO getContactInfo(@NotEmpty String contactId) {
+        TokenUserInfoDto tokenUserInfoDto = getTokenUserInfo();
+        // 查找联系人信息
+        UserInfo userInfo = userInfoService.getUserInfoByUserId(contactId);
+        UserInfoVO userInfoVo = CopyTools.copy(userInfo, UserInfoVO.class);
+        userInfoVo.setContactStatus(UserContactStatusEnum.NOT_FRIEND.getStatus());
+        //判断是否是联系人
+        UserContact userContact = userContactService.getUserContactByUserIdAndContactId(tokenUserInfoDto.getUserId(), contactId);
+        if (userContact != null) {
+            userInfoVo.setContactStatus(userContact.getStatus());
+        }
+        return getSuccessResponseVO(userInfoVo);
     }
 }

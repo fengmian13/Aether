@@ -42,6 +42,7 @@ public class MessageHandler4Redis implements MessageHandler {
     public void sendMessage(MessageSendDto sendDto) {
         RTopic rTopic = redissonClient.getTopic(MESSAGE_TOPIC);
         rTopic.publish(sendDto);
+        log.warn("发送消息：{}", sendDto);
     }
 
     @PreDestroy

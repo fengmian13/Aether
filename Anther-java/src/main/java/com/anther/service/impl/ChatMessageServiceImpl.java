@@ -36,7 +36,6 @@ import com.anther.mappers.ChatMessageMapper;
 import com.anther.service.ChatMessageService;
 import com.anther.utils.StringTools;
 
-import static com.anther.utils.StringTools.generatePrivateSessionId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -174,28 +173,33 @@ public class ChatMessageServiceImpl implements ChatMessageService {
 
 	@Override
 	public MessageSendDto saveMessage(ChatMessage chatMessage, TokenUserInfoDto tokenUserInfoDto) {
-		//不是机器人回复，判断好友状态
-		if (!Constants.ROBOT_UID.equals(tokenUserInfoDto.getUserId())) {
-			List<String> contactList = redisComponent.getUserContactList(tokenUserInfoDto.getUserId());
-			if (!contactList.contains(chatMessage.getReceiveUserId())) {
-				UserContactTypeEnum userContactTypeEnum = UserContactTypeEnum.getByPrefix(chatMessage.getReceiveUserId());
-				if (UserContactTypeEnum.USER == userContactTypeEnum) {
-					throw new BusinessException(ResponseCodeEnum.CODE_904);
-				} else {
-					throw new BusinessException(ResponseCodeEnum.CODE_903);
-				}
-			}
-		}
+//		//不是机器人回复，判断好友状态
+//		if (!Constants.ROBOT_UID.equals(tokenUserInfoDto.getUserId())) {
+//			List<String> contactList = redisComponent.getUserContactList(tokenUserInfoDto.getUserId());
+//			if (!contactList.contains(chatMessage.getReceiveUserId())) {
+//				UserContactTypeEnum userContactTypeEnum = UserContactTypeEnum.getByPrefix(chatMessage.getReceiveUserId());
+//				if (UserContactTypeEnum.USER == userContactTypeEnum) {
+//					throw new BusinessException(ResponseCodeEnum.CODE_904);
+//				} else {
+//					throw new BusinessException(ResponseCodeEnum.CODE_903);
+//				}
+//			}
+//		}
+		// 获取对话两个人的id
 		String sessionId = null;
+		// 聊天类型
+		Integer sessionType = 0;
 		String sendUserId = tokenUserInfoDto.getUserId();
 		String contactId = chatMessage.getReceiveUserId();
 		//生成date的 时间
 		Long curTime = System.currentTimeMillis();
 		Date curDate = StringTools.getLocalDateTimeFromLong(curTime);
-
+		//获取联系人类型
 		UserContactTypeEnum contactTypeEnum = UserContactTypeEnum.getByPrefix(contactId);
 		MessageTypeEnum messageTypeEnum = MessageTypeEnum.getByType(chatMessage.getMsgType());
+		//获取最后一条消息
 		String lastMessage = chatMessage.getContent();
+		//转义文本
 		String messageContent = StringTools.resetMessageContent(lastMessage);
 		chatMessage.setContent(messageContent);
 		Integer status = MessageTypeEnum.MEDIA_CHAT == messageTypeEnum ? MessageStatusEnum.SENDING.getStatus() : MessageStatusEnum.SENDED.getStatus();
@@ -208,8 +212,10 @@ public class ChatMessageServiceImpl implements ChatMessageService {
 			if (UserContactTypeEnum.USER == contactTypeEnum) {
 				//生成会话ID
 				sessionId = StringTools.getChatSessionId4User(new String[]{sendUserId, contactId});
+				sessionType = UserContactTypeEnum.USER.getType();
 			} else {
 				sessionId = StringTools.getChatSessionId4Group(contactId);
+				sessionType = UserContactTypeEnum.GROUP.getType();
 			}
 			//更新会话消息
 			ChatSession chatSession = new ChatSession();
@@ -228,23 +234,44 @@ public class ChatMessageServiceImpl implements ChatMessageService {
 			chatMessage.setSendTime(curTime);
 			chatMessage.setMsgType(contactTypeEnum.getType());
 			chatMessage.setStatus(status);
+			chatMessage.setSessionType(sessionType);
+			chatMessage.setSessionType(1);
 			chatMessageMapper.insert(chatMessage);
 		}
-		MessageSendDto messageSend = CopyTools.copy(chatMessage, MessageSendDto.class);
-		if (Constants.ROBOT_UID.equals(contactId)) {
-			SysSettingDto sysSettingDto = redisComponent.getSysSetting();
-			TokenUserInfoDto robot = new TokenUserInfoDto();
-			robot.setUserId(sysSettingDto.getRobotUid());
-			robot.setNickName(sysSettingDto.getRobotNickName());
-			ChatMessage robotChatMessage = new ChatMessage();
-			robotChatMessage.setReceiveUserId(sendUserId);
-			//这里可以对接Ai 根据输入的信息做出回答
-			robotChatMessage.setContent("我只是一个机器人无法识别你的消息");
-			robotChatMessage.setMsgType(MessageTypeEnum.CHAT.getType());
-			saveMessage(robotChatMessage, robot);
-		} else {
-			messageHandler.sendMessage(messageSend);
-		}
+//		MessageSendDto messageSend = CopyTools.copy(chatMessage, MessageSendDto.class);
+		MessageSendDto messageSend = new MessageSendDto();
+		messageSend.setSessionId(chatMessage.getSessionId());
+		messageSend.setSendUserId(chatMessage.getSendUserId());
+		messageSend.setSendUserNickName(chatMessage.getSendUserNickName());
+		messageSend.setSendTime(chatMessage.getSendTime());
+		messageSend.setStatus(chatMessage.getStatus());
+		messageSend.setFileName(chatMessage.getFileName());
+		messageSend.setSendUserId(chatMessage.getSendUserId());
+		messageSend.setContactId(contactId);
+
+
+		System.out.println("messageSend:"+messageSend);
+		System.out.println("chatMessage:"+chatMessage);
+
+//		if (Constants.ROBOT_UID.equals(contactId)) {
+//			SysSettingDto sysSettingDto = redisComponent.getSysSetting();
+//			TokenUserInfoDto robot = new TokenUserInfoDto();
+//			robot.setUserId(sysSettingDto.getRobotUid());
+//			robot.setNickName(sysSettingDto.getRobotNickName());
+//			ChatMessage robotChatMessage = new ChatMessage();
+//			robotChatMessage.setReceiveUserId(sendUserId);
+//			//这里可以对接Ai 根据输入的信息做出回答
+//			robotChatMessage.setContent("我只是一个机器人无法识别你的消息");
+//			robotChatMessage.setMsgType(MessageTypeEnum.CHAT.getType());
+//			saveMessage(robotChatMessage, robot);
+//		} else {
+//			messageHandler.sendMessage(messageSend);
+//		}
+		messageHandler.sendMessage(messageSend);
+//		//添加缺少的字段
+//		messageSend.setMessageId(chatMessage.getId());
+//		messageSend.setMessageType(messageTypeEnum.getType());
+//		messageSend.setMessageContent(messageContent);
 		return messageSend;
 	}
 

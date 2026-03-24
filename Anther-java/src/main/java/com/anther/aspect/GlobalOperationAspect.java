@@ -55,6 +55,7 @@ public class GlobalOperationAspect {
     private void checkLogin(Boolean checkAdmin){
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
         String token = request.getHeader("token");
+        System.out.println("token:"+token);
         TokenUserInfoDto tokenUserInfoDto = redisComponent.getTokenUserInfoDto(token);
         if (tokenUserInfoDto == null){
             throw new BusinessException(ResponseCodeEnum.CODE_901);

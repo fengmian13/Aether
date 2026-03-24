@@ -324,7 +324,7 @@ public class UserContactServiceImpl implements UserContactService {
 
             //发送群消息
             MessageSendDto messageSend = CopyTools.copy(chatMessage, MessageSendDto.class);
-            messageSend.setReceiveUserId(groupInfo.getGroupId());
+            messageSend.setContactId(groupInfo.getGroupId());
             //获取群人数量
             UserContactQuery userContactQuery = new UserContactQuery();
             userContactQuery.setContactId(contactId);
@@ -342,5 +342,10 @@ public class UserContactServiceImpl implements UserContactService {
             userGroup.setRoleId(GroupRoleEnum.MASTER.getType());
             userGroupService.add(userGroup);
         }
+    }
+
+    @Override
+    public UserContact getUserContactByUserIdAndContactId(String userId, String contactId) {
+        return this.userContactMapper.selectByUserIdAndContactId(userId, contactId);
     }
 }

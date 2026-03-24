@@ -24,6 +24,49 @@ public class UserInfoVO {
 
     private Boolean admin;
 
+    /**
+     * 个性签名
+     */
+    private String personalSignature;
+
+    private String areaCode;
+
+    private String areaName;
+
+    private Integer contactStatus;
+
+    public String getPersonalSignature() {
+        return personalSignature;
+    }
+
+    public void setPersonalSignature(String personalSignature) {
+        this.personalSignature = personalSignature;
+    }
+
+    public String getAreaCode() {
+        return areaCode;
+    }
+
+    public void setAreaCode(String areaCode) {
+        this.areaCode = areaCode;
+    }
+
+    public String getAreaName() {
+        return areaName;
+    }
+
+    public void setAreaName(String areaName) {
+        this.areaName = areaName;
+    }
+
+    public Integer getContactStatus() {
+        return contactStatus;
+    }
+
+    public void setContactStatus(Integer contactStatus) {
+        this.contactStatus = contactStatus;
+    }
+
     public Boolean getAdmin() {
         return admin;
     }

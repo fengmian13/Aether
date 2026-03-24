@@ -129,4 +129,14 @@ public class RedisUtils<V> {
             return false;
         }
     }
+
+    public long remove(String key, Object value) {
+        try {
+            Long remove = redisTemplate.opsForList().remove(key, 1, value);
+            return remove;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return 0;
+        }
+    }
 }

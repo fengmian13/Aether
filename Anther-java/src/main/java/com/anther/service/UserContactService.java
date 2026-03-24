@@ -26,4 +26,9 @@ public interface UserContactService {
      */
     void addContact(String applyUserId, String receiveUserId, Integer contactType, String applyInfo);
 
+    /**
+     * 根据UserIdAndContactId查询对象
+     */
+    UserContact getUserContactByUserIdAndContactId(String userId, String contactId);
+
 }

@@ -8,6 +8,7 @@ import com.anther.entity.dto.TokenUserInfoDto;
 import com.anther.entity.enums.MeetingMemberStatusEnum;
 import com.anther.entity.enums.MessageSend2TypeEnum;
 import com.anther.entity.enums.MessageTypeEnum;
+import com.anther.entity.enums.UserContactTypeEnum;
 import com.anther.entity.po.UserInfo;
 import com.anther.entity.query.UserInfoQuery;
 import com.anther.mappers.UserInfoMapper;
@@ -47,42 +48,39 @@ public class ChannelContextUtils {
 
 
     private void sendMsg2Group(MessageSendDto messageSendDto) {
-        if (messageSendDto.getMeetingId() == null) {
+        if (messageSendDto.getContactId() == null) {
             return;
         }
-        ChannelGroup group = MEETING_ROOM_CONTEXT_MAP.get(messageSendDto.getMeetingId());
+
+        ChannelGroup group = GROUP_CONTEXT_MAP.get(messageSendDto.getContactId());
         if (group == null) {
             return;
         }
         group.writeAndFlush(new TextWebSocketFrame(JSON.toJSONString(messageSendDto)));
-        /**
-         * 特殊处理，消息发送后处理相关channel,用户退出后，移除channel
-         */
-        if (MessageTypeEnum.EXIT_MEETING_ROOM.getType().equals(messageSendDto.getMessageType())) {
-            VideoMeetingExitDto exitDto = JsonUtils.convertJson2Obj((String) messageSendDto.getMessageContent(), VideoMeetingExitDto.class);
-            removeContextFromGroup(exitDto.getExitUserId(), messageSendDto.getMeetingId());
-            List<MeetingMemberDto> meetingMemberDtoList = redisComponet.getMeetingMemberList(messageSendDto.getMeetingId());
-            List<MeetingMemberDto> onlineMemberList =
-                    meetingMemberDtoList.stream().filter(item -> MeetingMemberStatusEnum.NORMAL.getStatus().equals(item.getStatus())).collect(Collectors.toList());
-            if (onlineMemberList.isEmpty()) {
-                removeContextGroup(messageSendDto.getMeetingId());
+
+        //移除群聊
+        MessageTypeEnum messageTypeEnum = MessageTypeEnum.getByType(messageSendDto.getMessageType());
+        if (MessageTypeEnum.LEAVE_GROUP == messageTypeEnum || MessageTypeEnum.REMOVE_GROUP == messageTypeEnum) {
+            String userId = (String) messageSendDto.getExtendData();
+            redisComponet.removeUserContact(userId, messageSendDto.getContactId());
+            Channel channel = USER_CONTEXT_MAP.get(userId);
+            if (channel == null) {
+                return;
             }
-            return;
+            group.remove(channel);
         }
-        if (MessageTypeEnum.FINIS_MEETING.getType().equals(messageSendDto.getMessageType())) {
-            List<MeetingMemberDto> meetingMemberDtoList = redisComponet.getMeetingMemberList(messageSendDto.getMeetingId());
-            for (MeetingMemberDto meetingMemberDto : meetingMemberDtoList) {
-                removeContextFromGroup(meetingMemberDto.getUserId(), messageSendDto.getMeetingId());
-            }
-            removeContextGroup(messageSendDto.getMeetingId());
+
+        if (MessageTypeEnum.DISSOLUTION_GROUP == messageTypeEnum) {
+            GROUP_CONTEXT_MAP.remove(messageSendDto.getContactId());
+            group.close();
         }
     }
 
     private void sendMsg2User(MessageSendDto messageSendDto) {
-        if (messageSendDto.getReceiveUserId() == null) {
+        if (messageSendDto.getContactId() == null) {
             return;
         }
-        Channel channel = USER_CONTEXT_MAP.get(messageSendDto.getReceiveUserId());
+        Channel channel = USER_CONTEXT_MAP.get(messageSendDto.getContactId());
         if (channel == null) {
             return;
         }
@@ -91,7 +89,7 @@ public class ChannelContextUtils {
          * 强制下线特殊处理
          */
         if (MessageTypeEnum.FORCE_OFF_LINE.getType().equals(messageSendDto.getMessageType())) {
-            closeContext(messageSendDto.getReceiveUserId());
+            closeContext(messageSendDto.getContactId());
         }
     }
 
@@ -113,10 +111,13 @@ public class ChannelContextUtils {
      * @param messageSendDto
      */
     public void sendMessage(MessageSendDto messageSendDto) {
-        if (MessageSend2TypeEnum.USER.getType().equals(messageSendDto.getMessageSend2Type())) {
-            sendMsg2User(messageSendDto);
-        } else {
-            sendMsg2Group(messageSendDto);
+        UserContactTypeEnum contactTypeEnum = UserContactTypeEnum.getByPrefix(messageSendDto.getContactId());
+        switch (contactTypeEnum) {
+            case USER:
+                sendMsg2User(messageSendDto);
+                break;
+            case GROUP:
+                sendMsg2Group(messageSendDto);
         }
     }
 

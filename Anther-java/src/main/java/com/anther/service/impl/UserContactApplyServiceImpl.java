@@ -63,7 +63,7 @@ public class UserContactApplyServiceImpl implements UserContactApplyService {
     private UserContactService userContactService;
 
 
-    // TODO:补全群组
+
     @Override
     public Integer saveContactApply(UserContactApply userContactApply) {
         // 判断是否被拉黑
@@ -95,9 +95,9 @@ public class UserContactApplyServiceImpl implements UserContactApplyService {
 
         // 发送消息
         MessageSendDto messageSendDto = new MessageSendDto();
-        messageSendDto.setMessageSend2Type(MessageSend2TypeEnum.USER.getType());
+//        messageSendDto.setMessageSend2Type(MessageSend2TypeEnum.USER.getType());
         messageSendDto.setMessageType(MessageTypeEnum.USER_CONTACT_APPLY.getType());
-        messageSendDto.setReceiveUserId(userContactApply.getReceiveUserId());
+        messageSendDto.setContactId(userContactApply.getReceiveUserId());
         messageHandler.sendMessage(messageSendDto);
         return UserContactApplyStatusEnum.INIT.getStatus();
     }

@@ -4,6 +4,7 @@ package com.anther.entity.enums;
 import com.anther.utils.StringTools;
 
 public enum UserContactStatusEnum {
+    NOT_FRIEND(0, "非好友"),
     FRIEND(1, "好友"),
     DEL(2, "已删除好友"),
     BLACKLIST(3, "已拉黑好友"),

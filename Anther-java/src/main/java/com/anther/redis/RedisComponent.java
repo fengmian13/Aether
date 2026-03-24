@@ -97,6 +97,11 @@ public class RedisComponent {
         return (Long) redisUtils.get(Constants.REDIS_KEY_WS_USER_HEART_BEAT + userId);
     }
 
+    //删除用户联系人
+    public void removeUserContact(String userId, String contactId) {
+        redisUtils.remove(Constants.REDIS_KEY_USER_CONTACT + userId, contactId);
+    }
+
 //    public void add2Meeting(String meetingId, MeetingMemberDto meetingMemberDto) {
 //        redisUtils.hset(Constants.REDIS_KEY_MEETING_ROOM + meetingId, meetingMemberDto.getUserId(), meetingMemberDto);
 //    }
