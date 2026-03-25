@@ -49,6 +49,7 @@ public class HandlerTokenValidation extends SimpleChannelInboundHandler<FullHttp
         ctx.fireChannelRead(request.retain());
         //加入通道
         channelContextUtils.addContext(tokenUserInfoDto.getUserId(), ctx.channel());
+        log.info("用户连接注册: {}", tokenUserInfoDto.getUserId());
     }
 
     private TokenUserInfoDto checkToken(String token) {

@@ -87,15 +87,15 @@ public class HandlerWebSocket extends SimpleChannelInboundHandler<TextWebSocketF
     protected void channelRead0(ChannelHandlerContext ctx, TextWebSocketFrame textWebSocketFrame) {
         //接收心跳
         logger.info("收到消息:{}", textWebSocketFrame.text());
-//        String text = textWebSocketFrame.text();
-//        if (Constants.PING.equals(text)) {
-//            Channel channel = ctx.channel();
-//            Attribute<String> attribute = channel.attr(AttributeKey.valueOf(channel.id().toString()));
-//            String userId = attribute.get();
-//            redisComponet.saveUserHeartBeat(userId);
-//            return;
-//        }
-//
+        String text = textWebSocketFrame.text();
+        if (Constants.PING.equals(text)) {
+            Channel channel = ctx.channel();
+            Attribute<String> attribute = channel.attr(AttributeKey.valueOf(channel.id().toString()));
+            String userId = attribute.get();
+            redisComponet.saveUserHeartBeat(userId);
+            return;
+        }
+
 //        PeerConnectionDataDto dataDto = JsonUtils.convertJson2Obj(text, PeerConnectionDataDto.class);
 //        TokenUserInfoDto tokenUserInfoDto = redisComponet.getTokenUserInfoDto(dataDto.getToken());
 //        if (tokenUserInfoDto == null) {

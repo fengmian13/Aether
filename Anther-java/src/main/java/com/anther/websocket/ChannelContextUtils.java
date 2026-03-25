@@ -82,6 +82,7 @@ public class ChannelContextUtils {
         }
         Channel channel = USER_CONTEXT_MAP.get(messageSendDto.getContactId());
         if (channel == null) {
+            log.warn("用户不在线: {}", messageSendDto.getContactId());
             return;
         }
         channel.writeAndFlush(new TextWebSocketFrame(JSON.toJSONString(messageSendDto)));

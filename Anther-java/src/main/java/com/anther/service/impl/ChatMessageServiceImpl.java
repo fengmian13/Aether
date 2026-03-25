@@ -246,9 +246,12 @@ public class ChatMessageServiceImpl implements ChatMessageService {
 		messageSend.setSendTime(chatMessage.getSendTime());
 		messageSend.setStatus(chatMessage.getStatus());
 		messageSend.setFileName(chatMessage.getFileName());
-		messageSend.setSendUserId(chatMessage.getSendUserId());
 		messageSend.setContactId(contactId);
 
+
+		messageSend.setMessageType(chatMessage.getMsgType());
+		messageSend.setMessageContent(chatMessage.getContent());
+		messageSend.setMessageId(chatMessage.getId());
 
 		System.out.println("messageSend:"+messageSend);
 		System.out.println("chatMessage:"+chatMessage);
