@@ -258,7 +258,7 @@ public class UserInfoServiceImpl implements UserInfoService {
 			}
 			File tempFile = new File(appConfig.getProjectFolder() + Constants.FILE_FOLDER_TEMP + StringTools.getRandomString(Constants.LENGTH_30));// 临时文件保存路径
 			file.transferTo(tempFile);// 保存文件
-			fFmpegUtils.createImageThumbnail(tempFile, filePath);// 创建缩略图
+			fFmpegUtils.createImageThumbnail(tempFile, filePath);// 创建缩略图:TODO 待完善
 		}
 		this.userInfoMapper.updateByUserId(userInfo, userInfo.getUserId());
 		TokenUserInfoDto tokenUserInfoDto = redisComponent.getTokenUserInfoDtoByUserId(userInfo.getUserId());
