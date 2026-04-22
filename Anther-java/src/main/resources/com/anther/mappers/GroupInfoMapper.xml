@@ -277,6 +277,7 @@
 		on gi.group_id = ug.group_id
 		where gi.group_id=#{groupId}
 		and ug.role_id = #{roleId}
+		limit 1
 	</select>
 
 	<delete id="dissolutionGroup">

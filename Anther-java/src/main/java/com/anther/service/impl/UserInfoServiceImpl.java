@@ -242,7 +242,7 @@ public class UserInfoServiceImpl implements UserInfoService {
 	}
 
 	@Override
-	public void updateUserInfo(MultipartFile file, UserInfo userInfo) throws IOException {
+	public void updateUserInfo(MultipartFile file, UserInfo userInfo, MultipartFile avatarCover) throws IOException {
 		if (file != null) {
 			String folder = appConfig.getProjectFolder() + Constants.FILE_FOLDER_FILE+Constants.FILE_FOLDER_AVATAR_NAME;//  头像保存目录
 			File folderFile = new File(folder); //  创建保存文件夹
@@ -252,6 +252,10 @@ public class UserInfoServiceImpl implements UserInfoService {
 			//  保存文件
 			String realFileName = userInfo.getUserId() + Constants.IMAGE_SUFFIX;// 文件名
 			String filePath = folderFile + realFileName; // 文件保存路径
+			File tempFolder = new File(appConfig.getProjectFolder() + Constants.FILE_FOLDER_TEMP);
+			if (!tempFolder.exists()) {
+				tempFolder.mkdirs();
+			}
 			File tempFile = new File(appConfig.getProjectFolder() + Constants.FILE_FOLDER_TEMP + StringTools.getRandomString(Constants.LENGTH_30));// 临时文件保存路径
 			file.transferTo(tempFile);// 保存文件
 			fFmpegUtils.createImageThumbnail(tempFile, filePath);// 创建缩略图

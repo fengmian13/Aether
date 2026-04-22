@@ -53,11 +53,12 @@ public class NettyWebSocketStarter implements Runnable {
     @Override
     public void run() {
         try{
-            ServerBootstrap serverBootstrap = new ServerBootstrap();
+            ServerBootstrap serverBootstrap = new ServerBootstrap();// 启动类
             serverBootstrap.group(bossGroup, workerGroup);
 
+            // 设置netty配置项
             serverBootstrap.channel(NioServerSocketChannel.class)
-                    .handler(new LoggingHandler(LogLevel.DEBUG))
+                    .handler(new LoggingHandler(LogLevel.DEBUG))// 日志级别：debug
                     .childHandler(new ChannelInitializer<Channel>() {
                         @Override
                         protected void initChannel(Channel channel) {
@@ -67,12 +68,12 @@ public class NettyWebSocketStarter implements Runnable {
                              * 通常作为第一个处理器添加
                              * 必须在 HttpObjectAggregator 之前
                              */
-                            pipeline.addLast(new HttpServerCodec());
+                            pipeline.addLast(new HttpServerCodec());// http编解码器
                             /**
                              * 这是一个 HTTP 消息聚合器，主要功能是将分片的 HTTP 消息
                              * （如 chunked 传输编码的消息）聚合成完整的 FullHttpRequest 或 FullHttpResponse。
                              */
-                            pipeline.addLast(new HttpObjectAggregator(64 * 1024));
+                            pipeline.addLast(new HttpObjectAggregator(64 * 1024));// HTTP 消息聚合器
 
                             /**
                              * 检测连接空闲状态的处理器 会传递给下一个处理器
@@ -84,7 +85,7 @@ public class NettyWebSocketStarter implements Runnable {
                             /**
                              * 处理空闲事件
                              */
-                            pipeline.addLast(new HandlerHeartBeat());
+                            pipeline.addLast(new HandlerHeartBeat());// 心跳检测
                             /**
                              * 拦截 channelRead 事件
                              * TOKEN校验
@@ -121,7 +122,7 @@ public class NettyWebSocketStarter implements Runnable {
     }
 
     @PreDestroy
-    public void close() {
+    public void close() {// Spring 容器关闭前，线程销毁
         bossGroup.shutdownGracefully();
         workerGroup.shutdownGracefully();
     }

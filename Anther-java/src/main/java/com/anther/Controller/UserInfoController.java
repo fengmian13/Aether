@@ -1,17 +1,22 @@
 package com.anther.Controller;
 
+import java.io.IOException;
 import java.util.List;
 
+import com.anther.annotation.GlobalInterceptor;
 import com.anther.entity.dto.TokenUserInfoDto;
 import com.anther.entity.query.UserInfoQuery;
 import com.anther.entity.po.UserInfo;
 import com.anther.entity.vo.ResponseVO;
+import com.anther.redis.RedisComponent;
 import com.anther.service.UserInfoService;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * 用户信息 Controller
@@ -19,6 +24,9 @@ import javax.annotation.Resource;
 @RestController
 @RequestMapping("/userInfo")
 public class UserInfoController extends ABaseController{
+
+	@Resource
+	private RedisComponent redisComponent;
 
 	@Resource
 	private UserInfoService userInfoService;
@@ -118,6 +126,23 @@ public class UserInfoController extends ABaseController{
 	@RequestMapping("/deleteUserInfoByEmail")
 	public ResponseVO deleteUserInfoByEmail(String email) {
 		userInfoService.deleteUserInfoByEmail(email);
+		return getSuccessResponseVO(null);
+	}
+
+	@RequestMapping("/saveUserInfo")
+	@GlobalInterceptor
+	public ResponseVO saveUserInfo( UserInfo userInfo, MultipartFile avatarFile, MultipartFile avatarCover) throws IOException {
+		TokenUserInfoDto tokenUserInfoDto = getTokenUserInfo();
+		userInfo.setUserId(tokenUserInfoDto.getUserId());
+		userInfo.setPassword(null);
+		userInfo.setStatus(null);
+		userInfo.setCreateTime(null);
+		userInfo.setLastLoginTime(null);
+		this.userInfoService.updateUserInfo(avatarFile, userInfo, avatarCover);
+		if (!tokenUserInfoDto.getNickName().equals(userInfo.getNickName())) {
+			tokenUserInfoDto.setNickName(userInfo.getNickName());
+			redisComponent.saveTokenUserInfoDto(tokenUserInfoDto);
+		}
 		return getSuccessResponseVO(null);
 	}
 }

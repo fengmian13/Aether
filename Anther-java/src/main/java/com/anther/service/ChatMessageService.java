@@ -1,6 +1,7 @@
 package com.anther.service;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 import com.anther.entity.dto.MessageSendDto;
@@ -8,6 +9,7 @@ import com.anther.entity.dto.TokenUserInfoDto;
 import com.anther.entity.query.ChatMessageQuery;
 import com.anther.entity.po.ChatMessage;
 import com.anther.entity.vo.PaginationResultVO;
+import org.springframework.web.multipart.MultipartFile;
 
 
 /**
@@ -76,4 +78,5 @@ public interface ChatMessageService {
 
 	File downloadFile(TokenUserInfoDto userInfoDto, Long messageId, Boolean cover);
 
+	void saveMessageFile(String userId, Long messageId, MultipartFile file, MultipartFile cover);
 }

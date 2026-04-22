@@ -34,6 +34,7 @@ import javax.validation.constraints.Size;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  *  Controller
@@ -78,6 +79,14 @@ public class ChatMessageController extends ABaseController{
 		chatMessage.setMsgType(messageType);
 		MessageSendDto messageSendDto = chatMessageService.saveMessage(chatMessage, tokenUserInfoDto);
 		return getSuccessResponseVO(messageSendDto);
+	}
+
+	@RequestMapping("/uploadFile")
+	@GlobalInterceptor
+	public ResponseVO uploadFile(@NotNull MultipartFile file, @NotNull Long messageId, @NotNull Long sendTime, MultipartFile cover) throws IOException {
+		TokenUserInfoDto tokenUserInfoDto = getTokenUserInfo();
+		chatMessageService.saveMessageFile(tokenUserInfoDto.getUserId(), messageId, file, cover);
+		return getSuccessResponseVO(null);
 	}
 
 	@RequestMapping("downloadFile")

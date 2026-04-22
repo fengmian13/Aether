@@ -105,20 +105,24 @@ public class UserContactServiceImpl implements UserContactService {
 
         List<UserContact> userContactList = this.userContactMapper.selectList(param);
         for (UserContact userContact : userContactList) {
-            UserContactControllerDto resultDto = new UserContactControllerDto();
-            resultDto.setContactId(userContact.getContactId());
-            resultDto.setStatus(userContact.getStatus());
+            //判断contact_id的首字母是否为U
+            if (userContact.getContactId().startsWith("U")) {
+                UserContactControllerDto resultDto = new UserContactControllerDto();
+                resultDto.setContactId(userContact.getContactId());
+                resultDto.setStatus(userContact.getStatus());
 
-            UserInfo userInfo = userInfoMapper.selectByUserId(userContact.getContactId());
-            if (userInfo != null) {
-                resultDto.setNickName(userInfo.getNickName());
-                resultDto.setSex(userInfo.getSex());
-            }else {
-                resultDto.setNickName("");
-                resultDto.setSex(null);
+                UserInfo userInfo = userInfoMapper.selectByUserId(userContact.getContactId());
+                if (userInfo != null) {
+                    resultDto.setNickName(userInfo.getNickName());
+                    resultDto.setSex(userInfo.getSex());
+                }
+//            else {
+//                resultDto.setNickName("");
+//                resultDto.setSex(null);
+//            }
+
+                resultList.add(resultDto);
             }
-
-            resultList.add(resultDto);
         }
         return resultList;
     }

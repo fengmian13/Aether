@@ -1,6 +1,7 @@
 package com.anther.service.impl;
 
 import java.io.File;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
@@ -20,6 +21,7 @@ import com.anther.exception.BusinessException;
 import com.anther.mappers.ChatSessionMapper;
 import com.anther.mappers.UserContactMapper;
 import com.anther.redis.RedisComponent;
+import com.anther.redis.RedisUtils;
 import com.anther.utils.CopyTools;
 import com.anther.utils.DateUtil;
 import com.anther.websocket.message.MessageHandler;
@@ -40,6 +42,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.anther.entity.constants.Constants;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  *  业务接口实现
@@ -47,6 +50,8 @@ import com.anther.entity.constants.Constants;
 @Slf4j
 @Service("chatMessageService")
 public class ChatMessageServiceImpl implements ChatMessageService {
+	@Resource
+	private RedisUtils redisUtils;
 	private static final Logger logger = LoggerFactory.getLogger(ChatMessageServiceImpl.class);
 
 	@Resource
@@ -314,5 +319,63 @@ public class ChatMessageServiceImpl implements ChatMessageService {
 			throw new BusinessException(ResponseCodeEnum.CODE_602);
 		}
 		return file;
+	}
+
+
+	public void saveMessageFile(String userId, Long messageId, MultipartFile file, MultipartFile cover) {
+		ChatMessage message = chatMessageMapper.selectById(messageId);
+		if (null == message) {
+			throw new BusinessException(ResponseCodeEnum.CODE_600);
+		}
+		if (!message.getSendUserId().equals(userId)) {
+			throw new BusinessException(ResponseCodeEnum.CODE_600);
+		}
+
+		SysSettingDto sysSettingDto = redisComponent.getSysSetting();
+		String fileSuffix = StringTools.getFileSuffix(file.getOriginalFilename());
+		if (!StringTools.isEmpty(fileSuffix) && ArraysUtil.contains(Constants.IMAGE_SUFFIX_LIST, fileSuffix.toLowerCase())
+				&& file.getSize() > Constants.FILE_SIZE_MB * sysSettingDto.getMaxImageSize()) {
+			return;
+		} else if (!StringTools.isEmpty(fileSuffix) && ArraysUtil.contains(Constants.VIDEO_SUFFIX_LIST, fileSuffix.toLowerCase())
+				&& file.getSize() > Constants.FILE_SIZE_MB * sysSettingDto.getMaxVideoSize()) {
+			return;
+		} else if (!StringTools.isEmpty(fileSuffix) &&
+				!ArraysUtil.contains(Constants.VIDEO_SUFFIX_LIST, fileSuffix.toLowerCase()) &&
+				!ArraysUtil.contains(Constants.IMAGE_SUFFIX_LIST, fileSuffix.toLowerCase()) &&
+				file.getSize() > Constants.FILE_SIZE_MB * sysSettingDto.getMaxFileSize()) {
+			return;
+		}
+		String fileName = file.getOriginalFilename();
+		String fileExtName = StringTools.getFileSuffix(fileName);
+		String fileRealName = messageId + fileExtName;
+		String month = DateUtil.format(new Date(message.getSendTime()), DateTimePatternEnum.YYYYMM.getPattern());
+		File folder = new File(appConfig.getProjectFolder() + Constants.FILE_FOLDER_FILE + month);
+		if (!folder.exists()) {
+			folder.mkdirs();
+		}
+
+		File uploadFile = new File(folder.getPath() + "/" + fileRealName);
+		try {
+			file.transferTo(uploadFile);
+			if (cover != null) {
+				cover.transferTo(new File(uploadFile.getPath() + Constants.COVER_IMAGE_SUFFIX));
+			}
+		} catch (Exception e) {
+			logger.error("上传文件失败", e);
+			throw new BusinessException("文件上传失败");
+		}
+
+		ChatMessage updateInfo = new ChatMessage();
+		updateInfo.setStatus(MessageStatusEnum.SENDED.getStatus());
+		ChatMessageQuery messageQuery = new ChatMessageQuery();
+		messageQuery.setId(messageId);
+		chatMessageMapper.updateByParam(updateInfo, messageQuery);
+
+		MessageSendDto messageSend = new MessageSendDto();
+		messageSend.setStatus(MessageStatusEnum.SENDED.getStatus());
+		messageSend.setMessageId(message.getId());
+		messageSend.setMessageType(MessageTypeEnum.FILE_UPLOAD.getType());
+		messageSend.setContactId(message.getReceiveUserId());
+		messageHandler.sendMessage(messageSend);
 	}
 }

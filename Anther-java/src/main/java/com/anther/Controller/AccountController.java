@@ -133,7 +133,7 @@ public class AccountController extends ABaseController {
         userInfo.setNickName(nickName);
         userInfo.setSex(sex);
         userInfo.setUserId(tokenUserInfoDto.getUserId());
-        userInfoService.updateUserInfo(avatar, userInfo);
+        userInfoService.updateUserInfo(avatar, userInfo, null);
         return getSuccessResponseVO(null);
     }
 

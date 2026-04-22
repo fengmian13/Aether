@@ -109,7 +109,7 @@ public interface UserInfoService {
 	/**
 	 * 修改用户信息
 	 */
-	void updateUserInfo(MultipartFile avatar, UserInfo userInfo) throws IOException;
+	void updateUserInfo(MultipartFile avatar, UserInfo userInfo,MultipartFile avatarCover) throws IOException;
 
 	/**
 	 * 修改密码
