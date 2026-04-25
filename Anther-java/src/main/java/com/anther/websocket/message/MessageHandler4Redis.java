@@ -33,7 +33,7 @@ public class MessageHandler4Redis implements MessageHandler {
     public void listenMessage() {
         RTopic rTopic = redissonClient.getTopic(MESSAGE_TOPIC);
         rTopic.addListener(MessageSendDto.class, (MessageSendDto, sendDto) -> {
-            log.info("redis收到消息:{}", JsonUtils.convertObj2Json(sendDto));
+//            log.info("redis收到消息:{}", JsonUtils.convertObj2Json(sendDto));
             channelContextUtils.sendMessage(sendDto);
         });
     }

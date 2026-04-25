@@ -13,7 +13,7 @@ public class ChatMessage implements Serializable {
 	/**
 	 * 
 	 */
-	private Long id;
+	private Long messageId;
 
 	/**
 	 * 会话ID
@@ -38,12 +38,12 @@ public class ChatMessage implements Serializable {
 	/**
 	 * 消息类型：1=文本, 2=图片, 3=视频, 4=文件, 5=撤回指令, 6=系统通知
 	 */
-	private Integer msgType;
+	private Integer messageType;
 
 	/**
 	 * 消息详情
 	 */
-	private String content;
+	private String messageContent;
 
 	/**
 	 * 发送时间
@@ -53,7 +53,7 @@ public class ChatMessage implements Serializable {
 	/**
 	 * 接收人ID
 	 */
-	private String receiveUserId;
+	private String contactId;
 
 	/**
 	 * 文件大小
@@ -75,13 +75,25 @@ public class ChatMessage implements Serializable {
 	 */
 	private Integer status;
 
+	/**
+	 * 联系人类型 0:单聊 1:群聊
+	 */
+	private Integer contactType;
 
-	public void setId(Long id){
-		this.id = id;
+	public Integer getContactType() {
+		return contactType;
 	}
 
-	public Long getId(){
-		return this.id;
+	public void setContactType(Integer contactType) {
+		this.contactType = contactType;
+	}
+
+	public Long getMessageId() {
+		return messageId;
+	}
+
+	public void setMessageId(Long messageId) {
+		this.messageId = messageId;
 	}
 
 	public void setSessionId(String sessionId){
@@ -116,20 +128,20 @@ public class ChatMessage implements Serializable {
 		return this.sendUserNickName;
 	}
 
-	public void setMsgType(Integer msgType){
-		this.msgType = msgType;
+	public Integer getMessageType() {
+		return messageType;
 	}
 
-	public Integer getMsgType(){
-		return this.msgType;
+	public void setMessageType(Integer messageType) {
+		this.messageType = messageType;
 	}
 
-	public void setContent(String content){
-		this.content = content;
+	public String getMessageContent() {
+		return messageContent;
 	}
 
-	public String getContent(){
-		return this.content;
+	public void setMessageContent(String messageContent) {
+		this.messageContent = messageContent;
 	}
 
 	public void setSendTime(Long sendTime){
@@ -140,12 +152,12 @@ public class ChatMessage implements Serializable {
 		return this.sendTime;
 	}
 
-	public void setReceiveUserId(String receiveUserId){
-		this.receiveUserId = receiveUserId;
+	public String getContactId() {
+		return contactId;
 	}
 
-	public String getReceiveUserId(){
-		return this.receiveUserId;
+	public void setContactId(String contactId) {
+		this.contactId = contactId;
 	}
 
 	public void setFileSize(Long fileSize){
@@ -182,6 +194,6 @@ public class ChatMessage implements Serializable {
 
 	@Override
 	public String toString (){
-		return "id:"+(id == null ? "空" : id)+"，会话ID:"+(sessionId == null ? "空" : sessionId)+"，1=私聊, 2=群聊, 3=会议聊天:"+(sessionType == null ? "空" : sessionType)+"，发送人ID:"+(sendUserId == null ? "空" : sendUserId)+"，消息类型：1=文本, 2=图片, 3=视频, 4=文件, 5=撤回指令, 6=系统通知:"+(msgType == null ? "空" : msgType)+"，消息详情:"+(content == null ? "空" : content)+"，发送时间:"+(sendTime == null ? "空" : sendTime)+"，接收人ID:"+(receiveUserId == null ? "空" : receiveUserId)+"，文件大小:"+(fileSize == null ? "空" : fileSize)+"，文件名:"+(fileName == null ? "空" : fileName)+"，文件后缀:"+(fileSuffix == null ? "空" : fileSuffix)+"，状态 0:正在发送 1:已发送:"+(status == null ? "空" : status);
+		return "id:"+(messageId == null ? "空" : messageId)+"，会话ID:"+(sessionId == null ? "空" : sessionId)+"，1=私聊, 2=群聊, 3=会议聊天:"+(sessionType == null ? "空" : sessionType)+"，发送人ID:"+(sendUserId == null ? "空" : sendUserId)+"，消息类型：1=文本, 2=图片, 3=视频, 4=文件, 5=撤回指令, 6=系统通知:"+(messageType == null ? "空" : messageType)+"，消息详情:"+(messageContent == null ? "空" : messageContent)+"，发送时间:"+(sendTime == null ? "空" : sendTime)+"，接收人ID:"+(contactId == null ? "空" : contactId)+"，文件大小:"+(fileSize == null ? "空" : fileSize)+"，文件名:"+(fileName == null ? "空" : fileName)+"，文件后缀:"+(fileSuffix == null ? "空" : fileSuffix)+"，状态 0:正在发送 1:已发送:"+(status == null ? "空" : status);
 	}
 }

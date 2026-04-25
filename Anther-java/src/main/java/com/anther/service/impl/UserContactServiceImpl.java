@@ -64,7 +64,7 @@ public class UserContactServiceImpl implements UserContactService {
         }
 
         // 判断是用户还是群组
-        System.out.println(userInfo.getContactType());
+        System.out.println("userInfo.getContactType"+userInfo.getContactType());
         if (ContactTypeEnum.USER.getType().equals(userInfo.getContactType())){
             resultDto.setContactType(ContactTypeEnum.USER.getType());
         } else if (ContactTypeEnum.GROUP.getType().equals(userInfo.getContactType())) {
@@ -240,7 +240,7 @@ public class UserContactServiceImpl implements UserContactService {
             applySessionUser.setUserId(applyUserId);
             applySessionUser.setContactId(contactId);
             applySessionUser.setSessionId(sessionId);
-            applySessionUser.setLastReceiveTime(curDate.getTime());
+            applySessionUser.setLastReceiveTime(curDate);
             applySessionUser.setLastMessage(applyInfo);
             //查询接收人信息
             UserInfo contactUser = this.userInfoMapper.selectByUserId(contactId);
@@ -252,7 +252,7 @@ public class UserContactServiceImpl implements UserContactService {
             contactSessionUser.setUserId(contactId);
             contactSessionUser.setContactId(applyUserId);
             contactSessionUser.setSessionId(sessionId);
-            contactSessionUser.setLastReceiveTime(curDate.getTime());
+            contactSessionUser.setLastReceiveTime(curDate);
             contactSessionUser.setLastMessage(applyInfo);
             //查询申请人信息
             UserInfo applyUserInfo = this.userInfoMapper.selectByUserId(applyUserId);
@@ -263,8 +263,8 @@ public class UserContactServiceImpl implements UserContactService {
             //记录消息消息表
             ChatMessage chatMessage = new ChatMessage();
             chatMessage.setSessionId(sessionId);
-            chatMessage.setMsgType(MessageTypeEnum.ADD_FRIEND.getType());
-            chatMessage.setContent(applyInfo);
+            chatMessage.setMessageType(MessageTypeEnum.ADD_FRIEND.getType());
+            chatMessage.setMessageContent(applyInfo);
             chatMessage.setSendUserId(applyUserId);
             chatMessage.setSendUserNickName(applyUserInfo.getNickName());
             chatMessage.setSendTime(curDate.getTime());
@@ -316,12 +316,12 @@ public class UserContactServiceImpl implements UserContactService {
             //增加聊天消息
             ChatMessage chatMessage = new ChatMessage();
             chatMessage.setSessionId(sessionId);
-            chatMessage.setMsgType(MessageTypeEnum.ADD_GROUP.getType());
-            chatMessage.setContent(sendMessage);
+            chatMessage.setMessageType(MessageTypeEnum.ADD_GROUP.getType());
+            chatMessage.setMessageContent(sendMessage);
             chatMessage.setSendUserId(null);
             chatMessage.setSendUserNickName(null);
             chatMessage.setSendTime(curDate.getTime());
-            chatMessage.setReceiveUserId(contactId);
+            chatMessage.setContactId(contactId);
             chatMessage.setSessionType(UserContactTypeEnum.GROUP.getType());
             chatMessage.setStatus(MessageStatusEnum.SENDED.getStatus());
             chatMessageMapper.insert(chatMessage);
@@ -342,7 +342,7 @@ public class UserContactServiceImpl implements UserContactService {
             //判断是否拉黑
             UserGroup userGroup = new UserGroup();
             userGroup.setUserId(applyUserId);
-            userGroup.setGroupId(receiveUserId);
+            userGroup.setGroupId(contactId);
             userGroup.setRoleId(GroupRoleEnum.MASTER.getType());
             userGroupService.add(userGroup);
         }

@@ -1,6 +1,7 @@
 package com.anther.entity.query;
 
 
+import java.util.List;
 
 /**
  * 参数
@@ -11,7 +12,7 @@ public class ChatMessageQuery extends BaseParam {
 	/**
 	 * 
 	 */
-	private Long id;
+	private Long messageId;
 
 	/**
 	 * 会话ID
@@ -19,6 +20,13 @@ public class ChatMessageQuery extends BaseParam {
 	private String sessionId;
 
 	private String sessionIdFuzzy;
+
+	/**
+	 * 发送人昵称
+	 */
+	private String sendUserNickName;
+
+	private String sendUserNickNameFuzzy;
 
 	/**
 	 * 1=私聊, 2=群聊, 3=会议聊天
@@ -35,12 +43,12 @@ public class ChatMessageQuery extends BaseParam {
 	/**
 	 * 消息类型：1=文本, 2=图片, 3=视频, 4=文件, 5=撤回指令, 6=系统通知
 	 */
-	private Integer msgType;
+	private Integer messageType;
 
 	/**
 	 * 消息详情
 	 */
-	private String content;
+	private String messageContent;
 
 	private String contentFuzzy;
 
@@ -52,9 +60,9 @@ public class ChatMessageQuery extends BaseParam {
 	/**
 	 * 接收人ID
 	 */
-	private String receiveUserId;
+	private String contactId;
 
-	private String receiveUserIdFuzzy;
+	private String contactIdFuzzy;
 
 	/**
 	 * 文件大小
@@ -80,13 +88,71 @@ public class ChatMessageQuery extends BaseParam {
 	 */
 	private Integer status;
 
+	private List<String> contactIdList;
 
-	public void setId(Long id){
-		this.id = id;
+	private Long lastReceiveTime;
+
+	private String messageContentFuzzy;
+
+	/**
+	 * 联系人类型 0:单聊 1:群聊
+	 */
+	private Integer contactType;
+
+	public Integer getContactType() {
+		return contactType;
 	}
 
-	public Long getId(){
-		return this.id;
+	public void setContactType(Integer contactType) {
+		this.contactType = contactType;
+	}
+
+	public List<String> getContactIdList() {
+		return contactIdList;
+	}
+
+	public void setContactIdList(List<String> contactIdList) {
+		this.contactIdList = contactIdList;
+	}
+
+	public Long getLastReceiveTime() {
+		return lastReceiveTime;
+	}
+
+	public void setLastReceiveTime(Long lastReceiveTime) {
+		this.lastReceiveTime = lastReceiveTime;
+	}
+
+	public String getSendUserNickName() {
+		return sendUserNickName;
+	}
+
+	public void setSendUserNickName(String sendUserNickName) {
+		this.sendUserNickName = sendUserNickName;
+	}
+
+	public String getSendUserNickNameFuzzy() {
+		return sendUserNickNameFuzzy;
+	}
+
+	public void setSendUserNickNameFuzzy(String sendUserNickNameFuzzy) {
+		this.sendUserNickNameFuzzy = sendUserNickNameFuzzy;
+	}
+
+	public String getMessageContentFuzzy() {
+		return messageContentFuzzy;
+	}
+
+	public void setMessageContentFuzzy(String messageContentFuzzy) {
+		this.messageContentFuzzy = messageContentFuzzy;
+	}
+
+	public Long getMessageId() {
+		return messageId;
+	}
+
+	public void setMessageId(Long messageId) {
+		this.messageId = messageId;
 	}
 
 	public void setSessionId(String sessionId){
@@ -129,20 +195,20 @@ public class ChatMessageQuery extends BaseParam {
 		return this.sendUserIdFuzzy;
 	}
 
-	public void setMsgType(Integer msgType){
-		this.msgType = msgType;
+	public Integer getMessageType() {
+		return messageType;
 	}
 
-	public Integer getMsgType(){
-		return this.msgType;
+	public void setMessageType(Integer messageType) {
+		this.messageType = messageType;
 	}
 
-	public void setContent(String content){
-		this.content = content;
+	public String getMessageContent() {
+		return messageContent;
 	}
 
-	public String getContent(){
-		return this.content;
+	public void setMessageContent(String messageContent) {
+		this.messageContent = messageContent;
 	}
 
 	public void setContentFuzzy(String contentFuzzy){
@@ -161,20 +227,20 @@ public class ChatMessageQuery extends BaseParam {
 		return this.sendTime;
 	}
 
-	public void setReceiveUserId(String receiveUserId){
-		this.receiveUserId = receiveUserId;
+	public String getContactId() {
+		return contactId;
 	}
 
-	public String getReceiveUserId(){
-		return this.receiveUserId;
+	public void setContactId(String contactId) {
+		this.contactId = contactId;
 	}
 
-	public void setReceiveUserIdFuzzy(String receiveUserIdFuzzy){
-		this.receiveUserIdFuzzy = receiveUserIdFuzzy;
+	public String getContactIdFuzzy() {
+		return contactIdFuzzy;
 	}
 
-	public String getReceiveUserIdFuzzy(){
-		return this.receiveUserIdFuzzy;
+	public void setContactIdFuzzy(String contactIdFuzzy) {
+		this.contactIdFuzzy = contactIdFuzzy;
 	}
 
 	public void setFileSize(Long fileSize){

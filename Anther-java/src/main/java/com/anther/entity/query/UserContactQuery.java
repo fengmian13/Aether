@@ -42,7 +42,25 @@ public class UserContactQuery extends BaseParam {
 
 	private String lastUpdateTimeEnd;
 
+	private Boolean queryContactUserInfo;
 
+	private Boolean queryGroupInfo;
+
+	public Boolean getQueryGroupInfo() {
+		return queryGroupInfo;
+	}
+
+	public void setQueryGroupInfo(Boolean queryGroupInfo) {
+		this.queryGroupInfo = queryGroupInfo;
+	}
+
+	public Boolean getQueryContactUserInfo() {
+		return queryContactUserInfo;
+	}
+
+	public void setQueryContactUserInfo(Boolean queryContactUserInfo) {
+		this.queryContactUserInfo = queryContactUserInfo;
+	}
 
 	public void setContactType(Integer contactType) {
 		this.contactType = contactType;

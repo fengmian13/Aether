@@ -37,6 +37,48 @@ public class UserContactApplyQuery extends BaseParam {
 	 */
 	private Integer status;
 
+	private Long lastApplyTimestamp;
+
+	/**
+	 * 申请信息
+	 */
+	private String applyInfo;
+
+	private String applyInfoFuzzy;
+
+	private Boolean queryContactInfo;
+
+	public String getApplyInfo() {
+		return applyInfo;
+	}
+
+	public void setApplyInfo(String applyInfo) {
+		this.applyInfo = applyInfo;
+	}
+
+	public String getApplyInfoFuzzy() {
+		return applyInfoFuzzy;
+	}
+
+	public void setApplyInfoFuzzy(String applyInfoFuzzy) {
+		this.applyInfoFuzzy = applyInfoFuzzy;
+	}
+
+	public Boolean getQueryContactInfo() {
+		return queryContactInfo;
+	}
+
+	public void setQueryContactInfo(Boolean queryContactInfo) {
+		this.queryContactInfo = queryContactInfo;
+	}
+
+	public Long getLastApplyTimestamp() {
+		return lastApplyTimestamp;
+	}
+
+	public void setLastApplyTimestamp(Long lastApplyTimestamp) {
+		this.lastApplyTimestamp = lastApplyTimestamp;
+	}
 
 	public void setApplyId(Integer applyId){
 		this.applyId = applyId;

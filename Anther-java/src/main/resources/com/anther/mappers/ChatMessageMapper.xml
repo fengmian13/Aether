@@ -6,21 +6,25 @@
 	<!--实体映射-->
 	<resultMap id="base_result_map" type="com.anther.entity.po.ChatMessage">
 		<!---->
-		<id column="id" property="id"  />
+		<id column="message_id" property="messageId"  />
 		<!--会话ID-->
 		<result column="session_id" property="sessionId"  />
 		<!--1=私聊, 2=群聊, 3=会议聊天-->
 		<result column="session_type" property="sessionType"  />
 		<!--发送人ID-->
 		<result column="send_user_id" property="sendUserId"  />
+		<!--发送人昵称-->
+		<result column="send_user_nick_name" property="sendUserNickName"/>
 		<!--消息类型：1=文本, 2=图片, 3=视频, 4=文件, 5=撤回指令, 6=系统通知-->
-		<result column="msg_type" property="msgType"  />
-		<!--消息详情-->
-		<result column="content" property="content"  />
+		<result column="message_type" property="messageType"/>
+		<!--消息内容-->
+		<result column="message_content" property="messageContent"/>
 		<!--发送时间-->
 		<result column="send_time" property="sendTime"  />
 		<!--接收人ID-->
-		<result column="receive_user_id" property="receiveUserId"  />
+		<result column="contact_id" property="contactId"  />
+		<!--联系人类型 0:单聊 1:群聊-->
+		<result column="contact_type" property="contactType"/>
 		<!--文件大小-->
 		<result column="file_size" property="fileSize"  />
 		<!--文件名-->
@@ -34,14 +38,14 @@
 
 	<!-- 通用查询结果列-->
 	<sql id="base_column_list">
-		 id,session_id,session_type,send_user_id,msg_type,
-		 content,send_time,receive_user_id,file_size,file_name,
+		message_id,session_id,session_type,send_user_id,message_type,message_content,
+		 send_user_nick_name,send_time,contact_id,contact_type,file_size,file_name,
 		 file_suffix,status
 	</sql>
 
 	<sql id="base_condition_filed">
-		<if test="query.id != null">
-			 and  id = #{query.id}
+		<if test="query.messageId != null">
+			 and  messageId = #{query.messageId}
 		</if>
 		<if test="query.sessionId != null and query.sessionId!=''">
 			 and  session_id = #{query.sessionId}
@@ -52,17 +56,32 @@
 		<if test="query.sendUserId != null and query.sendUserId!=''">
 			 and  send_user_id = #{query.sendUserId}
 		</if>
-		<if test="query.msgType != null">
-			 and  msg_type = #{query.msgType}
+		<if test="query.messageType != null">
+			and message_type = #{query.messageType}
 		</if>
-		<if test="query.content != null and query.content!=''">
-			 and  content = #{query.content}
+		<if test="query.messageContent != null and query.messageContent!=''">
+			and message_content = #{query.messageContent}
+		</if>
+		<if test="query.sendUserNickName != null and query.sendUserNickName!=''">
+			and send_user_nick_name = #{query.sendUserNickName}
 		</if>
 		<if test="query.sendTime != null">
 			 and  send_time = #{query.sendTime}
 		</if>
-		<if test="query.receiveUserId != null and query.receiveUserId!=''">
-			 and  receive_user_id = #{query.receiveUserId}
+		<if test="query.contactId != null and query.contactId!=''">
+			 and  contact_id = #{query.contactId}
+		</if>
+		<if test="query.contactType != null">
+			and contact_type = #{query.contactType}
+		</if>
+		<if test="query.contactIdList != null and query.contactIdList.size() > 0">
+			and  contact_id in
+			<foreach collection="query.contactIdList" item="contactId" open="(" separator="," close=")">
+				#{contactId}
+			</foreach>
+		</if>
+		<if test="query.lastReceiveTime != null">
+			<![CDATA[ and  send_time > #{query.lastReceiveTime} ]]>
 		</if>
 		<if test="query.fileSize != null">
 			 and  file_size = #{query.fileSize}
@@ -88,11 +107,11 @@
 			<if test="query.sendUserIdFuzzy!= null  and query.sendUserIdFuzzy!=''">
 				 and  send_user_id like concat('%', #{query.sendUserIdFuzzy}, '%')
 			</if>
-			<if test="query.contentFuzzy!= null  and query.contentFuzzy!=''">
-				 and  content like concat('%', #{query.contentFuzzy}, '%')
+			<if test="query.messageContentFuzzy!= null  and query.messageContentFuzzy!=''">
+				and message_content like concat('%', #{query.messageContentFuzzy}, '%')
 			</if>
-			<if test="query.receiveUserIdFuzzy!= null  and query.receiveUserIdFuzzy!=''">
-				 and  receive_user_id like concat('%', #{query.receiveUserIdFuzzy}, '%')
+			<if test="query.contactIdFuzzy!= null  and query.contactIdFuzzy!=''">
+				 and  contact_id like concat('%', #{query.contactIdFuzzy}, '%')
 			</if>
 			<if test="query.fileNameFuzzy!= null  and query.fileNameFuzzy!=''">
 				 and  file_name like concat('%', #{query.fileNameFuzzy}, '%')
@@ -100,6 +119,13 @@
 			<if test="query.fileSuffixFuzzy!= null  and query.fileSuffixFuzzy!=''">
 				 and  file_suffix like concat('%', #{query.fileSuffixFuzzy}, '%')
 			</if>
+			<!--额外添加的查询条件-->
+			<if test="query.lastReceiveTime!=null">
+				and send_time>=#{query.lastReceiveTime}
+			</if>
+<!--			<if test="query.contactIdList!=null and query.contactIdList.size()>0">-->
+<!--				and contact_id in(<foreach collection="query.contactIdList" separator="," item="item">#{item}</foreach>)-->
+<!--			</if>-->
 		</where>
 	</sql>
 
@@ -121,7 +147,7 @@
 
 	<!-- 插入 （匹配有值的字段）-->
 	<insert id="insert" parameterType="com.anther.entity.po.ChatMessage">
-		<selectKey keyProperty="bean.id" resultType="Long" order="AFTER">
+		<selectKey keyProperty="bean.messageId" resultType="Long" order="AFTER">
 			SELECT LAST_INSERT_ID()
 		</selectKey>
 		 INSERT INTO chat_message
@@ -135,18 +161,24 @@
 			<if test="bean.sendUserId != null">
 				 send_user_id,
 			</if>
-			<if test="bean.msgType != null">
-				 msg_type,
-			</if>
-			<if test="bean.content != null">
-				 content,
-			</if>
+			 <if test="bean.sendUserNickName != null">
+				 send_user_nick_name,
+			 </if>
+			 <if test="bean.messageType != null">
+				 message_type,
+			 </if>
+			 <if test="bean.messageContent != null">
+				 message_content,
+			 </if>
 			<if test="bean.sendTime != null">
 				 send_time,
 			</if>
-			<if test="bean.receiveUserId != null">
-				 receive_user_id,
+			<if test="bean.contactId != null">
+				 contact_id,
 			</if>
+			 <if test="bean.contactType != null">
+				 contact_type,
+			 </if>
 			<if test="bean.fileSize != null">
 				 file_size,
 			</if>
@@ -170,18 +202,24 @@
 			<if test="bean.sendUserId!=null">
 				 #{bean.sendUserId},
 			</if>
-			<if test="bean.msgType!=null">
-				 #{bean.msgType},
-			</if>
-			<if test="bean.content!=null">
-				 #{bean.content},
-			</if>
+		     <if test="bean.sendUserNickName!=null">
+				 #{bean.sendUserNickName},
+			 </if>
+			 <if test="bean.messageType!=null">
+				 #{bean.messageType},
+			 </if>
+			 <if test="bean.messageContent!=null">
+				 #{bean.messageContent},
+			 </if>
 			<if test="bean.sendTime!=null">
 				 #{bean.sendTime},
 			</if>
-			<if test="bean.receiveUserId!=null">
-				 #{bean.receiveUserId},
+			<if test="bean.contactId!=null">
+				 #{bean.contactId},
 			</if>
+			 <if test="bean.contactType != null">
+				 #{bean.contactType},
+			 </if>
 			<if test="bean.fileSize!=null">
 				 #{bean.fileSize},
 			</if>
@@ -201,8 +239,8 @@
 	<insert id="insertOrUpdate" parameterType="com.anther.entity.po.ChatMessage">
 		 INSERT INTO chat_message
 		 <trim prefix="(" suffix=")" suffixOverrides=",">
-			<if test="bean.id != null">
-				 id,
+			<if test="bean.messageId != null">
+				message_id,
 			</if>
 			<if test="bean.sessionId != null">
 				 session_id,
@@ -213,18 +251,24 @@
 			<if test="bean.sendUserId != null">
 				 send_user_id,
 			</if>
-			<if test="bean.msgType != null">
-				 msg_type,
-			</if>
-			<if test="bean.content != null">
-				 content,
-			</if>
+		     <if test="bean.sendUserNickName != null">
+				 send_user_nick_name,
+			 </if>
+			 <if test="bean.messageType != null">
+				 message_type,
+			 </if>
+			 <if test="bean.messageContent != null">
+				 message_content,
+			 </if>
 			<if test="bean.sendTime != null">
 				 send_time,
 			</if>
-			<if test="bean.receiveUserId != null">
-				 receive_user_id,
+			<if test="bean.contactId != null">
+				 contact_id,
 			</if>
+			 <if test="bean.contactType != null">
+				 contact_type,
+			 </if>
 			<if test="bean.fileSize != null">
 				 file_size,
 			</if>
@@ -239,8 +283,8 @@
 			</if>
 		 </trim>
 		 <trim prefix="values (" suffix=")" suffixOverrides=",">
-			<if test="bean.id!=null">
-				 #{bean.id},
+			<if test="bean.messageId!=null">
+				 #{bean.messageId},
 			</if>
 			<if test="bean.sessionId!=null">
 				 #{bean.sessionId},
@@ -251,18 +295,24 @@
 			<if test="bean.sendUserId!=null">
 				 #{bean.sendUserId},
 			</if>
-			<if test="bean.msgType!=null">
-				 #{bean.msgType},
-			</if>
-			<if test="bean.content!=null">
-				 #{bean.content},
-			</if>
+		     <if test="bean.sendUserNickName!=null">
+				 #{bean.sendUserNickName},
+			 </if>
+			<if test="bean.messageType!=null">
+				 #{bean.messageType},
+			 </if>
+		     <if test="bean.messageContent!=null">
+				 #{bean.messageContent},
+			 </if>
 			<if test="bean.sendTime!=null">
 				 #{bean.sendTime},
 			</if>
-			<if test="bean.receiveUserId!=null">
-				 #{bean.receiveUserId},
+			<if test="bean.contactId!=null">
+				 #{bean.contactId},
 			</if>
+			 <if test="bean.contactType!=null">
+				 #{bean.contactType},
+			 </if>
 			<if test="bean.fileSize!=null">
 				 #{bean.fileSize},
 			</if>
@@ -287,18 +337,21 @@
 			<if test="bean.sendUserId!=null">
 				 send_user_id = VALUES(send_user_id),
 			</if>
-			<if test="bean.msgType!=null">
-				 msg_type = VALUES(msg_type),
-			</if>
-			<if test="bean.content!=null">
-				 content = VALUES(content),
-			</if>
+			 <if test="bean.messageType!=null">
+				 message_type = VALUES(message_type),
+			 </if>
+			 <if test="bean.messageContent!=null">
+				 message_content = VALUES(message_content),
+			 </if>
 			<if test="bean.sendTime!=null">
 				 send_time = VALUES(send_time),
 			</if>
-			<if test="bean.receiveUserId!=null">
-				 receive_user_id = VALUES(receive_user_id),
+			<if test="bean.contactId!=null">
+				 contact_id = VALUES(contact_id),
 			</if>
+			 <if test="bean.contactType!=null">
+				 contact_type = VALUES(contact_type),
+			 </if>
 			<if test="bean.fileSize!=null">
 				 file_size = VALUES(file_size),
 			</if>
@@ -315,15 +368,17 @@
 	</insert>
 
 	<!-- 添加 （批量插入）-->
-	<insert id="insertBatch" parameterType="com.anther.entity.po.ChatMessage" useGeneratedKeys="true" keyProperty="id">
+	<insert id="insertBatch" parameterType="com.anther.entity.po.ChatMessage" useGeneratedKeys="true" keyProperty="messageId">
 		 INSERT INTO chat_message(
 			 session_id,
 			 session_type,
 			 send_user_id,
-			 msg_type,
-			 content,
+		     send_user_nick_name,
+			 message_type,
+			 message_content,
 			 send_time,
-			 receive_user_id,
+			 contact_id,
+			 contact_type,
 			 file_size,
 			 file_name,
 			 file_suffix,
@@ -334,10 +389,12 @@
 				 #{item.sessionId},
 				 #{item.sessionType},
 				 #{item.sendUserId},
-				 #{item.msgType},
-				 #{item.content},
+			     #{item.sendUserNickName},
+				 #{item.messageType},
+				 #{item.messageContent},
 				 #{item.sendTime},
-				 #{item.receiveUserId},
+				 #{item.contactId},
+			 	 #{item.contactType},
 				 #{item.fileSize},
 				 #{item.fileName},
 				 #{item.fileSuffix},
@@ -352,10 +409,12 @@
 			 session_id,
 			 session_type,
 			 send_user_id,
-			 msg_type,
-			 content,
+		  	 send_user_nick_name,
+			 message_type,
+			 message_content,
 			 send_time,
-			 receive_user_id,
+			 contact_id,
+		 	 contact_type,
 			 file_size,
 			 file_name,
 			 file_suffix,
@@ -366,10 +425,12 @@
 				 #{item.sessionId},
 				 #{item.sessionType},
 				 #{item.sendUserId},
-				 #{item.msgType},
-				 #{item.content},
+			  	 #{item.sendUserNickName},
+				 #{item.messageType},
+				 #{item.messageContent},
 				 #{item.sendTime},
-				 #{item.receiveUserId},
+				 #{item.contactId},
+			 	 #{item.contactType},
 				 #{item.fileSize},
 				 #{item.fileName},
 				 #{item.fileSuffix},
@@ -380,10 +441,12 @@
 			session_id = VALUES(session_id),
 			session_type = VALUES(session_type),
 			send_user_id = VALUES(send_user_id),
-			msg_type = VALUES(msg_type),
-			content = VALUES(content),
+			send_user_nick_name = VALUES(send_user_nick_name),
+			message_type = VALUES(message_type),
+			message_content = VALUES(message_content),
 			send_time = VALUES(send_time),
-			receive_user_id = VALUES(receive_user_id),
+			contact_id = VALUES(contact_id),
+		 	contact_type = VALUES(contact_type),
 			file_size = VALUES(file_size),
 			file_name = VALUES(file_name),
 			file_suffix = VALUES(file_suffix),
@@ -403,18 +466,21 @@
 			<if test="bean.sendUserId != null">
 				 send_user_id = #{bean.sendUserId},
 			</if>
-			<if test="bean.msgType != null">
-				 msg_type = #{bean.msgType},
-			</if>
-			<if test="bean.content != null">
-				 content = #{bean.content},
-			</if>
+			 <if test="bean.messageType != null">
+				 message_type = #{bean.messageType},
+			 </if>
+			 <if test="bean.messageContent != null">
+				 message_content = #{bean.messageContent},
+			 </if>
 			<if test="bean.sendTime != null">
 				 send_time = #{bean.sendTime},
 			</if>
-			<if test="bean.receiveUserId != null">
-				 receive_user_id = #{bean.receiveUserId},
+			<if test="bean.contactId != null">
+				 contact_id = #{bean.contactId},
 			</if>
+			 <if test="bean.contactType != null">
+				 contact_type = #{bean.contactType},
+			 </if>
 			<if test="bean.fileSize != null">
 				 file_size = #{bean.fileSize},
 			</if>
@@ -450,18 +516,21 @@
 			<if test="bean.sendUserId != null">
 				 send_user_id = #{bean.sendUserId},
 			</if>
-			<if test="bean.msgType != null">
-				 msg_type = #{bean.msgType},
-			</if>
-			<if test="bean.content != null">
-				 content = #{bean.content},
-			</if>
+			 <if test="bean.messageType != null">
+				 message_type = #{bean.messageType},
+			 </if>
+			 <if test="bean.messageContent != null">
+				 message_content = #{bean.messageContent},
+			 </if>
 			<if test="bean.sendTime != null">
 				 send_time = #{bean.sendTime},
 			</if>
-			<if test="bean.receiveUserId != null">
-				 receive_user_id = #{bean.receiveUserId},
+			<if test="bean.contactId != null">
+				 contact_id = #{bean.contactId},
 			</if>
+			 <if test="bean.contactType != null">
+				 contact_type = #{bean.contactType},
+			 </if>
 			<if test="bean.fileSize != null">
 				 file_size = #{bean.fileSize},
 			</if>
@@ -475,17 +544,17 @@
 				 status = #{bean.status},
 			</if>
  		 </set>
- 		 where id=#{id}
+ 		 where messageId=#{bean.messageId}
 	</update>
 
 	<!-- 根据Id删除-->
 	<delete id="deleteById">
-		delete from chat_message where id=#{id}
+		delete from chat_message where message_id=#{bean.messageId}
 	</delete>
 
 	<!-- 根据PrimaryKey获取对象-->
 	<select id="selectById" resultMap="base_result_map" >
-		select <include refid="base_column_list" /> from chat_message where id=#{id}
+		select <include refid="base_column_list" /> from chat_message where message_id=#{bean.messageId}
 	</select>
 
 </mapper>

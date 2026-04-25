@@ -63,14 +63,14 @@ public class StringTools {
     }
 
     //将两人的 userId 排序后拼接：U0001 和 U0005 私聊，session_id 是 U0001_U0005。
-    public static String generatePrivateSessionId(String UserId, String receiveUserId) {
-        if(UserId == null || receiveUserId == null){
+    public static String generatePrivateSessionId(String UserId, String contactId) {
+        if(UserId == null || contactId == null){
             throw new BusinessException("UserId 不能为空");
         }
-        if(UserId.compareTo(receiveUserId) < 0){
-            return UserId + "_" + receiveUserId;
+        if(UserId.compareTo(contactId) < 0){
+            return UserId + "_" + contactId;
         } else {
-            return receiveUserId + "_" + UserId;
+            return contactId + "_" + UserId;
         }
     }
 

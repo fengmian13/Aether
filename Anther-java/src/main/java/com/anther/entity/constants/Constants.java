@@ -111,5 +111,5 @@ public class Constants {
     //被管理员踢群
     public static final String out_group_TEMPLATE = "%s被管理员移出了群聊";
 
-
+    public static final Long MILLISECOND_3DAYS_AGO = 3 * 24 * 60 * 60 * 1000L;
 }

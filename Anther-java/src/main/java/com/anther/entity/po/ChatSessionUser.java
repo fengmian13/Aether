@@ -1,6 +1,11 @@
 package com.anther.entity.po;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.springframework.format.annotation.DateTimeFormat;
+
+import java.util.Date;
+
 import java.io.Serializable;
 
 
@@ -32,7 +37,9 @@ public class ChatSessionUser implements Serializable {
 
 	private String lastMessage;
 
-	private Long lastReceiveTime;
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	private Date lastReceiveTime;
 
 	private Integer contactType;
 
@@ -47,11 +54,11 @@ public class ChatSessionUser implements Serializable {
 		this.lastMessage = lastMessage;
 	}
 
-	public Long getLastReceiveTime() {
+	public Date getLastReceiveTime() {
 		return lastReceiveTime;
 	}
 
-	public void setLastReceiveTime(Long lastReceiveTime) {
+	public void setLastReceiveTime(Date lastReceiveTime) {
 		this.lastReceiveTime = lastReceiveTime;
 	}
 

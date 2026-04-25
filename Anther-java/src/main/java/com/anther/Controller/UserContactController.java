@@ -5,6 +5,7 @@ import com.anther.entity.enums.ContactTypeEnum;
 import com.anther.entity.enums.GroupRoleEnum;
 import com.anther.entity.enums.IdEnum;
 import com.anther.entity.enums.UserContactStatusEnum;
+import com.anther.entity.po.GroupInfo;
 import com.anther.entity.po.UserContact;
 import com.anther.entity.po.UserContactApply;
 import com.anther.entity.po.UserInfo;
@@ -208,14 +209,25 @@ public class UserContactController extends ABaseController{
     public ResponseVO getContactInfo(@NotEmpty String contactId) {
         TokenUserInfoDto tokenUserInfoDto = getTokenUserInfo();
         // 查找联系人信息
-        UserInfo userInfo = userInfoService.getUserInfoByUserId(contactId);
-        UserInfoVO userInfoVo = CopyTools.copy(userInfo, UserInfoVO.class);
-        userInfoVo.setContactStatus(UserContactStatusEnum.NOT_FRIEND.getStatus());
-        //判断是否是联系人
-        UserContact userContact = userContactService.getUserContactByUserIdAndContactId(tokenUserInfoDto.getUserId(), contactId);
-        if (userContact != null) {
-            userInfoVo.setContactStatus(userContact.getStatus());
+        //分用户还是群组
+        if(contactId.startsWith("U")){
+            UserInfo userInfo = userInfoService.getUserInfoByUserId(contactId);
+            UserInfoVO userInfoVo = CopyTools.copy(userInfo, UserInfoVO.class);
+            userInfoVo.setContactStatus(UserContactStatusEnum.NOT_FRIEND.getStatus());
+            //判断是否是联系人
+            UserContact userContact = userContactService.getUserContactByUserIdAndContactId(tokenUserInfoDto.getUserId(), contactId);
+            if (userContact != null) {
+                userInfoVo.setContactStatus(userContact.getStatus());
+            }
+            return getSuccessResponseVO(userInfoVo);
+        }else if(contactId.startsWith("G")){
+            GroupInfo groupInfo = groupInfoService.getGroupInfoByGroupId(contactId);
+            GroupInfoDto groupInfoDto = CopyTools.copy(groupInfo, GroupInfoDto.class);
+            groupInfoDto.setContactId(groupInfo.getGroupId());
+            groupInfoDto.setNickName(groupInfo.getGroupName());
+            //
+            return getSuccessResponseVO(groupInfoDto);
         }
-        return getSuccessResponseVO(userInfoVo);
+        return getSuccessResponseVO(null);
     }
 }

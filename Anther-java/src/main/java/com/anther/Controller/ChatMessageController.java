@@ -71,12 +71,12 @@ public class ChatMessageController extends ABaseController{
 		}
 		TokenUserInfoDto tokenUserInfoDto = getTokenUserInfo();
 		ChatMessage chatMessage = new ChatMessage();
-		chatMessage.setReceiveUserId(contactId);
-		chatMessage.setContent(messageContent);
+		chatMessage.setContactId(contactId);
+		chatMessage.setMessageContent(messageContent);
 		chatMessage.setFileSize(fileSize);
 		chatMessage.setFileName(fileName);
 		chatMessage.setFileSuffix(Suffix);
-		chatMessage.setMsgType(messageType);
+		chatMessage.setMessageType(messageType);
 		MessageSendDto messageSendDto = chatMessageService.saveMessage(chatMessage, tokenUserInfoDto);
 		return getSuccessResponseVO(messageSendDto);
 	}

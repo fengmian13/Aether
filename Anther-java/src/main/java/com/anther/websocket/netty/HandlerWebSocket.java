@@ -11,6 +11,7 @@ import com.anther.redis.RedisComponent;
 //import com.anther.service.MeetingInfoService;
 import com.anther.service.ChatMessageService;
 import com.anther.utils.JsonUtils;
+import com.anther.websocket.ChannelContextUtils;
 import com.anther.websocket.message.MessageHandler;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
@@ -44,6 +45,9 @@ public class HandlerWebSocket extends SimpleChannelInboundHandler<TextWebSocketF
 //    private MeetingInfoService meetingInfoService;
 
     @Resource
+    private ChannelContextUtils channelContextUtils;
+
+    @Resource
     private ChatMessageService chatMessageService;
 
     @Resource
@@ -73,7 +77,7 @@ public class HandlerWebSocket extends SimpleChannelInboundHandler<TextWebSocketF
     @Override
     public void channelInactive(ChannelHandlerContext ctx) {
         logger.info("有连接已经断开。。。");
-//        meetingInfoService.removeContext(ctx.channel());TODO:处理连接断开的逻辑
+        channelContextUtils.removeContext(ctx.channel());
     }
 
     /**
@@ -86,14 +90,13 @@ public class HandlerWebSocket extends SimpleChannelInboundHandler<TextWebSocketF
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, TextWebSocketFrame textWebSocketFrame) {
         //接收心跳
-        logger.info("收到消息:{}", textWebSocketFrame.text());
+//        logger.info("收到消息:{}", textWebSocketFrame.text());
         String text = textWebSocketFrame.text();
         if (Constants.PING.equals(text)) {
             Channel channel = ctx.channel();
             Attribute<String> attribute = channel.attr(AttributeKey.valueOf(channel.id().toString()));
             String userId = attribute.get();
             redisComponet.saveUserHeartBeat(userId);
-            return;
         }
 
 //        PeerConnectionDataDto dataDto = JsonUtils.convertJson2Obj(text, PeerConnectionDataDto.class);

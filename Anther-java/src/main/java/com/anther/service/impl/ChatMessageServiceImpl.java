@@ -181,8 +181,8 @@ public class ChatMessageServiceImpl implements ChatMessageService {
 //		//不是机器人回复，判断好友状态
 //		if (!Constants.ROBOT_UID.equals(tokenUserInfoDto.getUserId())) {
 //			List<String> contactList = redisComponent.getUserContactList(tokenUserInfoDto.getUserId());
-//			if (!contactList.contains(chatMessage.getReceiveUserId())) {
-//				UserContactTypeEnum userContactTypeEnum = UserContactTypeEnum.getByPrefix(chatMessage.getReceiveUserId());
+//			if (!contactList.contains(chatMessage.getcontactId())) {
+//				UserContactTypeEnum userContactTypeEnum = UserContactTypeEnum.getByPrefix(chatMessage.getcontactId());
 //				if (UserContactTypeEnum.USER == userContactTypeEnum) {
 //					throw new BusinessException(ResponseCodeEnum.CODE_904);
 //				} else {
@@ -195,18 +195,21 @@ public class ChatMessageServiceImpl implements ChatMessageService {
 		// 聊天类型
 		Integer sessionType = 0;
 		String sendUserId = tokenUserInfoDto.getUserId();
-		String contactId = chatMessage.getReceiveUserId();
+		String contactId = chatMessage.getContactId();
 		//生成date的 时间
 		Long curTime = System.currentTimeMillis();
 		Date curDate = StringTools.getLocalDateTimeFromLong(curTime);
+		System.out.println("curDate"+ curDate);
+		System.out.println("curTime"+ curTime);
+		System.out.println("contactId"+ contactId);
 		//获取联系人类型
 		UserContactTypeEnum contactTypeEnum = UserContactTypeEnum.getByPrefix(contactId);
-		MessageTypeEnum messageTypeEnum = MessageTypeEnum.getByType(chatMessage.getMsgType());
+		MessageTypeEnum messageTypeEnum = MessageTypeEnum.getByType(chatMessage.getMessageType());
 		//获取最后一条消息
-		String lastMessage = chatMessage.getContent();
+		String lastMessage = chatMessage.getMessageContent();
 		//转义文本
 		String messageContent = StringTools.resetMessageContent(lastMessage);
-		chatMessage.setContent(messageContent);
+		chatMessage.setMessageContent(messageContent);
 		Integer status = MessageTypeEnum.MEDIA_CHAT == messageTypeEnum ? MessageStatusEnum.SENDING.getStatus() : MessageStatusEnum.SENDED.getStatus();
 		if (ArraysUtil.contains(new Integer[]{
 				MessageTypeEnum.CHAT.getType(),
@@ -236,11 +239,14 @@ public class ChatMessageServiceImpl implements ChatMessageService {
 			chatMessage.setSessionId(sessionId);
 			chatMessage.setSendUserId(sendUserId);
 			chatMessage.setSendUserNickName(tokenUserInfoDto.getNickName());
+			System.out.println("getNickName:"+ tokenUserInfoDto.getNickName());
 			chatMessage.setSendTime(curTime);
-			chatMessage.setMsgType(contactTypeEnum.getType());
+//			chatMessage.setMsgType(contactTypeEnum.getType());
+			if(contactTypeEnum != null) {
+				chatMessage.setContactType(contactTypeEnum.getType());
+			}
 			chatMessage.setStatus(status);
 			chatMessage.setSessionType(sessionType);
-			chatMessage.setSessionType(1);
 			chatMessageMapper.insert(chatMessage);
 		}
 //		MessageSendDto messageSend = CopyTools.copy(chatMessage, MessageSendDto.class);
@@ -253,10 +259,14 @@ public class ChatMessageServiceImpl implements ChatMessageService {
 		messageSend.setFileName(chatMessage.getFileName());
 		messageSend.setContactId(contactId);
 
+		System.out.println("contactTypeEnum.getType():"+ contactTypeEnum.getType());
+		if(contactTypeEnum != null) {
+			messageSend.setContactType(contactTypeEnum.getType());
+		}
 
-		messageSend.setMessageType(chatMessage.getMsgType());
-		messageSend.setMessageContent(chatMessage.getContent());
-		messageSend.setMessageId(chatMessage.getId());
+		messageSend.setMessageType(chatMessage.getMessageType());
+		messageSend.setMessageContent(chatMessage.getMessageContent());
+		messageSend.setMessageId(chatMessage.getMessageId());
 
 		System.out.println("messageSend:"+messageSend);
 		System.out.println("chatMessage:"+chatMessage);
@@ -285,9 +295,9 @@ public class ChatMessageServiceImpl implements ChatMessageService {
 
 	public File downloadFile(TokenUserInfoDto userInfoDto, Long messageId, Boolean cover) {
 		ChatMessage message = chatMessageMapper.selectById(messageId);
-		String contactId = message.getReceiveUserId();
+		String contactId = message.getContactId();
 		UserContactTypeEnum contactTypeEnum = UserContactTypeEnum.getByPrefix(contactId);
-		if (UserContactTypeEnum.USER.getType().equals(contactTypeEnum) && !userInfoDto.getUserId().equals(message.getReceiveUserId())) {
+		if (UserContactTypeEnum.USER.getType().equals(contactTypeEnum) && !userInfoDto.getUserId().equals(message.getContactId())) {
 			throw new BusinessException(ResponseCodeEnum.CODE_600);
 		}
 		if (UserContactTypeEnum.GROUP.getType().equals(contactTypeEnum)) {
@@ -368,14 +378,14 @@ public class ChatMessageServiceImpl implements ChatMessageService {
 		ChatMessage updateInfo = new ChatMessage();
 		updateInfo.setStatus(MessageStatusEnum.SENDED.getStatus());
 		ChatMessageQuery messageQuery = new ChatMessageQuery();
-		messageQuery.setId(messageId);
+		messageQuery.setMessageId(messageId);
 		chatMessageMapper.updateByParam(updateInfo, messageQuery);
 
 		MessageSendDto messageSend = new MessageSendDto();
 		messageSend.setStatus(MessageStatusEnum.SENDED.getStatus());
-		messageSend.setMessageId(message.getId());
+		messageSend.setMessageId(message.getMessageId());
 		messageSend.setMessageType(MessageTypeEnum.FILE_UPLOAD.getType());
-		messageSend.setContactId(message.getReceiveUserId());
+		messageSend.setContactId(message.getContactId());
 		messageHandler.sendMessage(messageSend);
 	}
 }
