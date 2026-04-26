@@ -14,6 +14,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.springframework.web.servlet.NoHandlerFoundException;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.ConstraintViolationException;
 
 @RestControllerAdvice
 public class AGlobalExceptionHandlerController extends ABaseController {
@@ -35,10 +36,19 @@ public class AGlobalExceptionHandlerController extends ABaseController {
             ajaxResponse.setCode(biz.getCode() == null ? ResponseCodeEnum.CODE_600.getCode() : biz.getCode());
             ajaxResponse.setInfo(biz.getMessage());
             ajaxResponse.setStatus(STATUC_ERROR);
-        } else if (e instanceof BindException|| e instanceof MethodArgumentTypeMismatchException) {
-            //参数类型错误
+        } else if (e instanceof BindException || e instanceof MethodArgumentTypeMismatchException || e instanceof ConstraintViolationException) {
+            //参数类型错误和校验错误
+            String message = e.getMessage();
+            if (e instanceof ConstraintViolationException) {
+                // 提取更友好的错误消息
+                ConstraintViolationException constraintViolationException = (ConstraintViolationException) e;
+                if (constraintViolationException.getConstraintViolations() != null &&
+                    !constraintViolationException.getConstraintViolations().isEmpty()) {
+                    message = constraintViolationException.getConstraintViolations().iterator().next().getMessage();
+                }
+            }
             ajaxResponse.setCode(ResponseCodeEnum.CODE_600.getCode());
-            ajaxResponse.setInfo(ResponseCodeEnum.CODE_600.getMsg());
+            ajaxResponse.setInfo(message != null ? message : ResponseCodeEnum.CODE_600.getMsg());
             ajaxResponse.setStatus(STATUC_ERROR);
         } else if (e instanceof DuplicateKeyException) {
             //主键冲突
