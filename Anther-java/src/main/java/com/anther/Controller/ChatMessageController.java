@@ -3,6 +3,7 @@ package com.anther.Controller;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
 
@@ -21,6 +22,7 @@ import com.anther.service.ChatMessageService;
 import com.anther.service.impl.ChatMessageServiceImpl;
 import com.anther.utils.StringTools;
 import org.apache.commons.lang3.ArrayUtils;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -148,27 +150,24 @@ public class ChatMessageController extends ABaseController{
 							 @NotEmpty String partType) throws Exception {
 		TokenUserInfoDto userInfoDto = getTokenUserInfo();
 		OutputStream out = null;
-		FileInputStream in = null;
+		InputStream in = null;
 		try {
-			File file;
+			long contentLength = -1L;
 			if ("avatar".equals(partType)) {
-				String avatarFolderName = Constants.FILE_FOLDER_FILE + Constants.FILE_FOLDER_AVATAR_NAME;
-				String avatarPath = appConfig.getProjectFolder() + avatarFolderName + fileId + Constants.IMAGE_SUFFIX;
-				if (showCover) {
-					avatarPath = avatarPath + Constants.COVER_IMAGE_SUFFIX;
-				}
-				file = new File(avatarPath);
-				if (!file.exists()) {
-					throw new BusinessException(ResponseCodeEnum.CODE_602);
-				}
+				org.springframework.core.io.Resource avatarResource = getAvatarResource(fileId, showCover);
+				contentLength = avatarResource.contentLength();
+				in = avatarResource.getInputStream();
 			} else {
-				file = chatMessageService.downloadFile(userInfoDto, Long.parseLong(fileId), showCover);
+				File file = chatMessageService.downloadFile(userInfoDto, Long.parseLong(fileId), showCover);
+				contentLength = file.length();
+				in = new FileInputStream(file);
 			}
 
 			response.setContentType("application/x-msdownload; charset=UTF-8");
 			response.setHeader("Content-Disposition", "attachment;");
-			response.setContentLengthLong(file.length());
-			in = new FileInputStream(file);
+			if (contentLength >= 0) {
+				response.setContentLengthLong(contentLength);
+			}
 			byte[] byteData = new byte[1024];
 			out = response.getOutputStream();
 			int len;
@@ -180,6 +179,22 @@ public class ChatMessageController extends ABaseController{
 			if (out != null) out.close();
 			if (in != null) in.close();
 		}
+	}
+
+	private org.springframework.core.io.Resource getAvatarResource(String fileId, Boolean showCover) {
+		String avatarFolderName = Constants.FILE_FOLDER_FILE + Constants.FILE_FOLDER_AVATAR_NAME;
+		String avatarBasePath = appConfig.getProjectFolder() + avatarFolderName + fileId + Constants.IMAGE_SUFFIX;
+		if (Boolean.TRUE.equals(showCover)) {
+			File coverFile = new File(avatarBasePath + Constants.COVER_IMAGE_SUFFIX);
+			if (coverFile.exists()) {
+				return new org.springframework.core.io.FileSystemResource(coverFile);
+			}
+		}
+		File avatarFile = new File(avatarBasePath);
+		if (avatarFile.exists()) {
+			return new org.springframework.core.io.FileSystemResource(avatarFile);
+		}
+		return new ClassPathResource(Constants.DEFAULT_AVATAR);
 	}
 
 

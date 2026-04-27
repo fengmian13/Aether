@@ -45,7 +45,7 @@
 
 	<sql id="base_condition_filed">
 		<if test="query.messageId != null">
-			 and  messageId = #{query.messageId}
+			 and  message_id = #{query.messageId}
 		</if>
 		<if test="query.sessionId != null and query.sessionId!=''">
 			 and  session_id = #{query.sessionId}
@@ -544,17 +544,17 @@
 				 status = #{bean.status},
 			</if>
  		 </set>
- 		 where messageId=#{bean.messageId}
+ 		 where message_id=#{bean.messageId}
 	</update>
 
 	<!-- 根据Id删除-->
 	<delete id="deleteById">
-		delete from chat_message where message_id=#{bean.messageId}
+		delete from chat_message where message_id=#{id}
 	</delete>
 
 	<!-- 根据PrimaryKey获取对象-->
 	<select id="selectById" resultMap="base_result_map" >
-		select <include refid="base_column_list" /> from chat_message where message_id=#{bean.messageId}
+		select <include refid="base_column_list" /> from chat_message where message_id=#{id}
 	</select>
 
 </mapper>

@@ -253,7 +253,7 @@ public class UserInfoServiceImpl implements UserInfoService {
 			}
 			//  保存文件
 			String realFileName = userInfo.getUserId() + Constants.IMAGE_SUFFIX;// 文件名
-			String filePath = folderFile + realFileName; // 文件保存路径
+			String filePath = new File(folderFile, realFileName).getPath(); // 文件保存路径
 			File tempFolder = new File(appConfig.getProjectFolder() + Constants.FILE_FOLDER_TEMP);
 			if (!tempFolder.exists()) {
 				tempFolder.mkdirs();
@@ -261,6 +261,9 @@ public class UserInfoServiceImpl implements UserInfoService {
 			File tempFile = new File(appConfig.getProjectFolder() + Constants.FILE_FOLDER_TEMP + StringTools.getRandomString(Constants.LENGTH_30));// 临时文件保存路径
 			file.transferTo(tempFile);// 保存文件
 			fFmpegUtils.createImageThumbnail(tempFile, filePath);// 创建缩略图:TODO 待完善
+			if (avatarCover != null && !avatarCover.isEmpty()) {
+				avatarCover.transferTo(new File(filePath + Constants.COVER_IMAGE_SUFFIX));
+			}
 		}
 		this.userInfoMapper.updateByUserId(userInfo, userInfo.getUserId());
 		TokenUserInfoDto tokenUserInfoDto = redisComponent.getTokenUserInfoDtoByUserId(userInfo.getUserId());
