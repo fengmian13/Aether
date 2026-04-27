@@ -67,6 +67,7 @@ public class AccountController extends ABaseController {
      * @date 2025/12/4 22:26
      * @version 1.0
      */
+//    新建用户时，join_type,的设定，TODO：待处理，现在暂时将join——type默认为1
     @RequestMapping("/register")
     public ResponseVO register(@NotEmpty String checkCodeKey,
                                @NotEmpty @Email String email,

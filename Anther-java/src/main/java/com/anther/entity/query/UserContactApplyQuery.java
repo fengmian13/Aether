@@ -48,6 +48,26 @@ public class UserContactApplyQuery extends BaseParam {
 
 	private Boolean queryContactInfo;
 
+	private Integer contactType;
+
+	private String contactId;
+
+	public String getContactId() {
+		return contactId;
+	}
+
+	public void setContactId(String contactId) {
+		this.contactId = contactId;
+	}
+
+	public Integer getContactType() {
+		return contactType;
+	}
+
+	public void setContactType(Integer contactType) {
+		this.contactType = contactType;
+	}
+
 	public String getApplyInfo() {
 		return applyInfo;
 	}

@@ -88,7 +88,7 @@ public class GroupInfoServiceImpl implements GroupInfoService {
 		String id = StringTools.getRandomNumber(Constants.LENGTH_12);
 		id = IdTools.getGroupId(id);
 		bean.setGroupId(id);
-		String joinType = bean.getJoinType();
+		Integer joinType = bean.getJoinType();
 		if (GroupJoinTypeEnum.ANYONE_CAN_JOIN.getType().equals(joinType)){
 			bean.setJoinType(GroupJoinTypeEnum.ANYONE_CAN_JOIN.getType());
 		}else {

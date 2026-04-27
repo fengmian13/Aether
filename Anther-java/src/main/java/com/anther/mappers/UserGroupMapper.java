@@ -18,4 +18,6 @@ public interface UserGroupMapper<T,P> extends BaseMapper<T,P> {
 
     UserGroup selectMasterByGroupIdAndRoleId(@Param("query") UserGroupQuery  param);
 
+    UserGroup selectByGroupId(String groupId, String roleId);
+
 }

@@ -73,6 +73,9 @@
 		<if test="query.meetingNo != null and query.meetingNo!=''">
 			 and  meeting_no = #{query.meetingNo}
 		</if>
+		<if test="query.contactType != null">
+			 and  contact_type = #{query.contactType}
+		</if>
 	</sql>
 
 	<!-- 通用查询条件列-->
@@ -99,6 +102,9 @@
 			</if>
 			<if test="query.meetingNoFuzzy!= null  and query.meetingNoFuzzy!=''">
 				 and  meeting_no like concat('%', #{query.meetingNoFuzzy}, '%')
+			</if>
+			<if test="query.contactType != null">
+				 and  contact_type = #{query.contactType}
 			</if>
 		</where>
 	</sql>
@@ -156,6 +162,9 @@
 			<if test="bean.meetingNo != null">
 				 meeting_no,
 			</if>
+		    <if test="bean.contactType != null">
+				 contact_type,
+			</if>
 		 </trim>
 		 <trim prefix="values (" suffix=")" suffixOverrides="," >
 			<if test="bean.userId!=null">
@@ -190,6 +199,9 @@
 			</if>
 			<if test="bean.meetingNo!=null">
 				 #{bean.meetingNo},
+			</if>
+		     <if test="bean.contactType!=null">
+				 #{bean.contactType},
 			</if>
 		 </trim>
 	</insert>
@@ -231,6 +243,9 @@
 			<if test="bean.meetingNo != null">
 				 meeting_no,
 			</if>
+		    <if test="bean.contactType != null">
+				 contact_type,
+			</if>
 		 </trim>
 		 <trim prefix="values (" suffix=")" suffixOverrides=",">
 			<if test="bean.userId!=null">
@@ -265,6 +280,9 @@
 			</if>
 			<if test="bean.meetingNo!=null">
 				 #{bean.meetingNo},
+			</if>
+		    <if test="bean.contactType!=null">
+				 #{bean.contactType},
 			</if>
 		 </trim>
 		 on DUPLICATE key update 
@@ -302,6 +320,9 @@
 			<if test="bean.meetingNo!=null">
 				 meeting_no = VALUES(meeting_no),
 			</if>
+			<if test="bean.contactType!=null">
+				 contact_type = VALUES(contact_type),
+			</if>
 		 </trim>
 	</insert>
 
@@ -318,7 +339,8 @@
 			 create_time,
 			 last_login_time,
 			 last_off_time,
-			 meeting_no
+			 meeting_no,
+		     contact_type
 		 )values
 		 <foreach collection="list" item="item" separator=",">
 			 (
@@ -332,7 +354,8 @@
 				 #{item.createTime},
 				 #{item.lastLoginTime},
 				 #{item.lastOffTime},
-				 #{item.meetingNo}
+				 #{item.meetingNo},
+				 #{item.contactType}
 			 )
 		 </foreach>
 	</insert>
@@ -350,7 +373,8 @@
 			 create_time,
 			 last_login_time,
 			 last_off_time,
-			 meeting_no
+			 meeting_no,
+		     contact_type
 		 )values
 		 <foreach collection="list" item="item" separator=",">
 			 (
@@ -364,7 +388,8 @@
 				 #{item.createTime},
 				 #{item.lastLoginTime},
 				 #{item.lastOffTime},
-				 #{item.meetingNo}
+				 #{item.meetingNo},
+			     #{item.contactType}
 			 )
 		 </foreach>
 			on DUPLICATE key update 
@@ -378,7 +403,8 @@
 			create_time = VALUES(create_time),
 			last_login_time = VALUES(last_login_time),
 			last_off_time = VALUES(last_off_time),
-			meeting_no = VALUES(meeting_no)
+			meeting_no = VALUES(meeting_no),
+			contact_type = VALUES(contact_type)
 	</insert>
 
 	<!--多条件修改-->
@@ -417,6 +443,9 @@
 			</if>
 			<if test="bean.meetingNo != null">
 				 meeting_no = #{bean.meetingNo},
+			</if>
+		     <if test="bean.contactType != null">
+				 contact_type = #{bean.contactType},
 			</if>
  		 </set>
  		 <include refid="query_condition" />
@@ -461,6 +490,9 @@
 			</if>
 			<if test="bean.meetingNo != null">
 				 meeting_no = #{bean.meetingNo},
+			</if>
+		     <if test="bean.contactType != null">
+				 contact_type = #{bean.contactType},
 			</if>
  		 </set>
  		 where user_id=#{userId}
@@ -514,6 +546,9 @@
 			</if>
 			<if test="bean.meetingNo != null">
 				 meeting_no = #{bean.meetingNo},
+			</if>
+		     <if test="bean.contactType != null">
+				 contact_type = #{bean.contactType},
 			</if>
  		 </set>
  		 where email=#{email}

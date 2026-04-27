@@ -9,6 +9,7 @@ import javax.annotation.Resource;
 
 import com.anther.entity.config.AppConfig;
 import com.anther.entity.dto.TokenUserInfoDto;
+import com.anther.entity.enums.ContactTypeEnum;
 import com.anther.entity.enums.UserStatusEnum;
 import com.anther.entity.vo.UserInfoVO;
 import com.anther.exception.BusinessException;
@@ -196,6 +197,7 @@ public class UserInfoServiceImpl implements UserInfoService {
 		userInfo.setLastOffTime(nowDate.getTime());
 		userInfo.setNickName(nickName);
 		userInfo.setSex(sex);
+		userInfo.setContactType(ContactTypeEnum.USER.getType());
 		this.userInfoMapper.insert(userInfo);
 	}
 

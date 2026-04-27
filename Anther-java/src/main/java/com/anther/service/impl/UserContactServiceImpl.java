@@ -171,6 +171,7 @@ public class UserContactServiceImpl implements UserContactService {
      */
     @Override
     public void addContact(String applyUserId, String receiveUserId, Integer contactType, String applyInfo) {
+        System.out.println("applyUserId"+applyUserId+"receiveUserId"+receiveUserId+"contactType:"+contactType);
         String contactId = receiveUserId;
         //群人上限判断
         if (UserContactTypeEnum.GROUP.getType().equals(contactType)) {
@@ -343,7 +344,7 @@ public class UserContactServiceImpl implements UserContactService {
             UserGroup userGroup = new UserGroup();
             userGroup.setUserId(applyUserId);
             userGroup.setGroupId(contactId);
-            userGroup.setRoleId(GroupRoleEnum.MASTER.getType());
+            userGroup.setRoleId(GroupRoleEnum.MEMBER.getType());
             userGroupService.add(userGroup);
         }
     }

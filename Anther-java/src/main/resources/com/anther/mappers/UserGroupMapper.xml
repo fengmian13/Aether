@@ -236,5 +236,23 @@
 	</select>
 
 
+	<select id="selectByGroupId"
+			resultMap="base_result_map" >
+		SELECT
+		<include refid="base_column_list" />
+		FROM user_group
+		<where>
+			<if test="groupId != null">
+				group_id = #{groupId}
+			</if>
+			<if test="roleId != null">
+				AND role_id = #{roleId}
+			</if>
+		</where>
+			ORDER BY user_id
+		LIMIT 1
+	 	</select>
+
+
 
 </mapper>

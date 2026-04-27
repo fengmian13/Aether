@@ -4,19 +4,11 @@ import com.anther.entity.dto.ContactApplyDto;
 import com.anther.entity.dto.MessageSendDto;
 import com.anther.entity.dto.TokenUserInfoDto;
 import com.anther.entity.enums.*;
-import com.anther.entity.po.UserContact;
-import com.anther.entity.po.UserContactApply;
-import com.anther.entity.po.UserGroup;
-import com.anther.entity.po.UserInfo;
-import com.anther.entity.query.UserContactApplyQuery;
-import com.anther.entity.query.UserContactQuery;
-import com.anther.entity.query.UserGroupQuery;
-import com.anther.entity.query.UserInfoQuery;
+import com.anther.entity.po.*;
+import com.anther.entity.query.*;
+import com.anther.entity.vo.PaginationResultVO;
 import com.anther.exception.BusinessException;
-import com.anther.mappers.UserContactApplyMapper;
-import com.anther.mappers.UserContactMapper;
-import com.anther.mappers.UserGroupMapper;
-import com.anther.mappers.UserInfoMapper;
+import com.anther.mappers.*;
 import com.anther.redis.RedisComponent;
 import com.anther.service.UserContactApplyService;
 import com.anther.service.UserContactService;
@@ -54,6 +46,9 @@ public class UserContactApplyServiceImpl implements UserContactApplyService {
     @Resource
     private UserGroupMapper<UserGroup, UserGroupQuery> userGroupMapper;
 
+    @Resource
+    private GroupInfoMapper<GroupInfo, GroupInfoQuery> groupInfoMapper;
+
     @Autowired
     private MessageHandler messageHandler;
     @Autowired
@@ -64,28 +59,75 @@ public class UserContactApplyServiceImpl implements UserContactApplyService {
 
 
 
-    @Override
-    public Integer saveContactApply(UserContactApply userContactApply) {
-        // 判断是否被拉黑
-        UserContact userContact = userContactMapper.selectByUserIdAndContactId(userContactApply.getReceiveUserId(), userContactApply.getApplyUserId());
-        if (userContact != null && UserContactStatusEnum.BLACKLIST.getStatus().equals(userContact.getStatus())){
-            throw new BusinessException("对方已将你拉黑");
+    @Override//contactId:U876751646631;applyUserId:U724303750698
+    public Integer saveContactApply(TokenUserInfoDto tokenUserInfoDto, String contactId, String contactType, String applyInfo) {
+        UserContactTypeEnum typeEnum = UserContactTypeEnum.getByName(contactType);
+        if (null == typeEnum) {
+            throw new BusinessException(ResponseCodeEnum.CODE_600);
         }
+        //申请人id
+        String applyUserId = tokenUserInfoDto.getUserId();
+
+        Long curDate = System.currentTimeMillis();
+        Integer joinType = null;
+        String receiveUserId = contactId;
+
+        //查询添加对象是否将自己拉黑
+        UserContact userContact = userContactMapper.selectByUserIdAndContactId(applyUserId, contactId);
+        if (null != userContact && UserContactStatusEnum.BLACKLIST.getStatus().equals(userContact.getStatus())) {
+            throw new BusinessException("对方已经你拉黑，无法添加");
+        }
+
+        if(UserContactTypeEnum.GROUP == typeEnum){
+            GroupInfo groupInfo = groupInfoMapper.selectByGroupId(contactId);
+            if (groupInfo == null || !groupInfo.getStatus().equals(GroupStatusEnum.NORMAL.getStatus())){
+                throw new BusinessException("群聊不存在或已解散");
+            }
+            joinType = groupInfo.getJoinType();
+            //TODO 后续groupInfo添加一个字段，所属人id
+            //查询userGroup表中的群主id
+            UserGroup userGroup = userGroupMapper.selectByGroupId(contactId, GroupRoleEnum.MASTER.getType());
+            receiveUserId = userGroup.getUserId();
+        } else if (UserContactTypeEnum.USER == typeEnum) {
+            UserInfo userInfo = userInfoMapper.selectByUserId(contactId);
+            if (userInfo == null ){
+                throw new BusinessException("用户不存在");
+            }
+            joinType = userInfo.getJoinType();
+            receiveUserId = contactId;
+        }
+
+        //joinType,是否是直接加入
+        System.out.println("joinType:"+joinType+"ANYONE_CAN_JOIN:"+GroupJoinTypeEnum.ANYONE_CAN_JOIN.getType());
+        if(GroupJoinTypeEnum.ANYONE_CAN_JOIN.getType().equals(joinType)){//直接加入
+            System.out.println("直接加入");
+            userContactService.addContact(applyUserId, contactId, typeEnum.getType(), applyInfo);
+            return joinType;
+        }
+
         // 已经是好友
         if (userContact != null && UserContactStatusEnum.FRIEND.getStatus().equals(userContact.getStatus())){
             // 更新自己的好友信息
             UserContact myUserContact = new UserContact();
             myUserContact.setStatus(UserContactStatusEnum.FRIEND.getStatus());
             myUserContact.setLastUpdateTime(new Date());
-            userContactMapper.updateByUserIdAndContactId(myUserContact, userContactApply.getApplyUserId(), userContactApply.getReceiveUserId());
+            userContactMapper.updateByUserIdAndContactId(myUserContact, applyUserId, receiveUserId);
             return UserContactStatusEnum.FRIEND.getStatus();
         }
+
         // 判断是否已存在申请,没有新建，有跟新时间
-        UserContactApply apply = userContactApplyMapper.selectByApplyUserIdAndReceiveUserId(userContactApply.getApplyUserId(), userContactApply.getReceiveUserId());
+        UserContactApply apply = userContactApplyMapper.selectByApplyUserIdAndReceiveUserId(applyUserId, receiveUserId);
         if (apply == null){
-            userContactApply.setStatus(UserContactApplyStatusEnum.INIT.getStatus());
-            userContactApply.setLastApplyTime(System.currentTimeMillis());
-            userContactApplyMapper.insert(userContactApply);
+            UserContactApply contactApply = new UserContactApply();
+            contactApply.setApplyUserId(applyUserId);
+            contactApply.setReceiveUserId(receiveUserId);
+            contactApply.setLastApplyTime(curDate);
+            contactApply.setStatus(UserContactApplyStatusEnum.INIT.getStatus());
+            contactApply.setApplyInfo(applyInfo);
+            contactApply.setContactType(typeEnum.getType());
+            contactApply.setContactId(contactId);
+            System.out.println("userContactApply.contactType:"+contactApply.getContactType());
+            userContactApplyMapper.insert(contactApply);
         } else {
             UserContactApply updateInfo = new UserContactApply();
             updateInfo.setStatus(UserContactApplyStatusEnum.INIT.getStatus());
@@ -97,7 +139,7 @@ public class UserContactApplyServiceImpl implements UserContactApplyService {
         MessageSendDto messageSendDto = new MessageSendDto();
 //        messageSendDto.setMessageSend2Type(MessageSend2TypeEnum.USER.getType());
         messageSendDto.setMessageType(MessageTypeEnum.USER_CONTACT_APPLY.getType());
-        messageSendDto.setContactId(userContactApply.getReceiveUserId());
+        messageSendDto.setContactId(receiveUserId);
         messageHandler.sendMessage(messageSendDto);
         return UserContactApplyStatusEnum.INIT.getStatus();
     }
@@ -135,7 +177,7 @@ public class UserContactApplyServiceImpl implements UserContactApplyService {
 
         //给用户添加联系人// 发消息，改到useContactService中
         if (UserContactApplyStatusEnum.PASS.equals(applyStatus)){
-            userContactService.addContact(apply.getApplyUserId(), apply.getReceiveUserId(), apply.getContactType(), apply.getApplyInfo());
+            userContactService.addContact(apply.getApplyUserId(), apply.getContactId(), apply.getContactType(), apply.getApplyInfo());
             return;
         }
 
@@ -156,26 +198,27 @@ public class UserContactApplyServiceImpl implements UserContactApplyService {
     }
 
     @Override
-    public List<ContactApplyDto> findListByParam(UserContactApplyQuery param) {
-        List<UserContactApply> applyList = userContactApplyMapper.selectList(param);
-        List<ContactApplyDto> result = new ArrayList<>();
-        for (UserContactApply apply : applyList) {
-            ContactApplyDto applyDto = new ContactApplyDto();
-            applyDto.setApplyUserId(apply.getApplyUserId());
-            applyDto.setReceiveUserId(apply.getReceiveUserId());
-            UserInfo userInfo = userInfoMapper.selectByUserId(apply.getApplyUserId());
-            if (userInfo != null) {
-                applyDto.setApplyUserNickName(userInfo.getNickName()); // 假设getNickName()是获取昵称的方法
-            } else {
-                applyDto.setApplyUserNickName("未知用户"); // 用户不存在时的默认值
-            }
-            applyDto.setStatus(apply.getStatus());
-            applyDto.setApplyTime(apply.getLastApplyTime().toString());
+    public List<UserContactApply> findListByParam(UserContactApplyQuery param) {
+        return this.userContactApplyMapper.selectList(param);
+    }
 
-            result.add(applyDto);
-        }
+    @Override
+    public Integer findCountByParam(UserContactApplyQuery param) {
+        return this.userContactApplyMapper.selectCount(param);
+    }
 
+    public PaginationResultVO<UserContactApply> findListByPage(UserContactApplyQuery param) {
+        int count = this.findCountByParam(param);
+        int pageSize = param.getPageSize() == null ? PageSize.SIZE15.getSize() : param.getPageSize();
 
+        System.out.println("count:"+count);
+        SimplePage page = new SimplePage(param.getPageNo(), count, pageSize);
+        param.setSimplePage(page);
+        System.out.println("param:"+param);
+        List<UserContactApply> list = this.findListByParam(param);
+        System.out.println("list:"+list);
+        PaginationResultVO<UserContactApply> result = new PaginationResultVO(count, page.getPageSize(), page.getPageNo(), page.getPageTotal(), list);
+        System.out.println("result:"+result);
         return result;
     }
 

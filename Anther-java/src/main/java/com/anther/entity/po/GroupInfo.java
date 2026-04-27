@@ -28,9 +28,19 @@ public class GroupInfo implements Serializable {
 	/**
 	 * 加入方式，是否需要管理员同意
 	 */
-	private String joinType;
+	private Integer joinType;
 
 	private String groupOwnerId;
+
+	private Integer status;
+
+	public Integer getStatus() {
+		return status;
+	}
+
+	public void setStatus(Integer status) {
+		this.status = status;
+	}
 
 	public String getGroupOwnerId() {
 		return groupOwnerId;
@@ -64,11 +74,11 @@ public class GroupInfo implements Serializable {
 		return this.groupIntroducte;
 	}
 
-	public void setJoinType(String joinType){
+	public void setJoinType(Integer joinType){
 		this.joinType = joinType;
 	}
 
-	public String getJoinType(){
+	public Integer getJoinType(){
 		return this.joinType;
 	}
 

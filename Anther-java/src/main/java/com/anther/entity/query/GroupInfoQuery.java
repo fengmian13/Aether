@@ -36,6 +36,15 @@ public class GroupInfoQuery extends BaseParam {
 
 	private String joinTypeFuzzy;
 
+	private String status;
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
+	}
 
 	public void setGroupId(String groupId){
 		this.groupId = groupId;

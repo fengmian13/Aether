@@ -159,6 +159,9 @@
 			<if test="bean.lastUpdateTime!=null">
 				 #{bean.lastUpdateTime},
 			</if>
+		    <if test="bean.contactType!=null">
+				 #{bean.contactType},
+			</if>
 		 </trim>
 	</insert>
 
@@ -234,14 +237,16 @@
 			 user_id,
 			 contact_id,
 			 status,
-			 last_update_time
+			 last_update_time,
+		     contact_type
 		 )values
 		 <foreach collection="list" item="item" separator=",">
 			 (
 				 #{item.userId},
 				 #{item.contactId},
 				 #{item.status},
-				 #{item.lastUpdateTime}
+				 #{item.lastUpdateTime},
+				 #{item.contactType}
 			 )
 		 </foreach>
 			on DUPLICATE key update 

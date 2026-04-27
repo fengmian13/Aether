@@ -25,9 +25,6 @@ public class UserContactApply implements Serializable {
 	 */
 	private String receiveUserId;
 
-	/**
-	 * 状态0:待处理 1:已同意  2:已拒绝 3:已拉黑
-	 */
 	private Integer contactType;
 
 	/**

@@ -19,6 +19,36 @@ public class ContactApplyDto implements Serializable {
     private String applyTime;
     private String ReceiveUserId;
 
+    private String applyInfo;
+
+    private Integer contactType;
+
+    private String contactId;
+
+    public String getContactId() {
+        return contactId;
+    }
+
+    public void setContactId(String contactId) {
+        this.contactId = contactId;
+    }
+
+    public Integer getContactType() {
+        return contactType;
+    }
+
+    public void setContactType(Integer contactType) {
+        this.contactType = contactType;
+    }
+
+    public String getApplyInfo() {
+        return applyInfo;
+    }
+
+    public void setApplyInfo(String applyInfo) {
+        this.applyInfo = applyInfo;
+    }
+
     public String getReceiveUserId() {
         return ReceiveUserId;
     }
