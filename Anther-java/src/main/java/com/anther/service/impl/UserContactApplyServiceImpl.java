@@ -73,7 +73,7 @@ public class UserContactApplyServiceImpl implements UserContactApplyService {
         String receiveUserId = contactId;
 
         //查询添加对象是否将自己拉黑
-        UserContact userContact = userContactMapper.selectByUserIdAndContactId(applyUserId, contactId);
+        UserContact userContact = userContactMapper.selectByUserIdAndContactId(contactId,applyUserId);
         if (null != userContact && UserContactStatusEnum.BLACKLIST.getStatus().equals(userContact.getStatus())) {
             throw new BusinessException("对方已经你拉黑，无法添加");
         }

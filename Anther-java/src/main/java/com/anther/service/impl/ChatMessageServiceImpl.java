@@ -196,6 +196,13 @@ public class ChatMessageServiceImpl implements ChatMessageService {
 		Integer sessionType = 0;
 		String sendUserId = tokenUserInfoDto.getUserId();
 		String contactId = chatMessage.getContactId();
+
+		//判断是否拉黑
+		System.out.println("userContact:"+contactId+"   sendUserId:"+sendUserId);
+		UserContact userContact = userContactMapper.selectByUserIdAndContactId(contactId,sendUserId);
+		if (null != userContact && UserContactStatusEnum.BLACKLIST.getStatus().equals(userContact.getStatus())) {
+			throw new BusinessException("对方已经你拉黑，无法发送消息");
+		}
 		//生成date的 时间
 		Long curTime = System.currentTimeMillis();
 		Date curDate = StringTools.getLocalDateTimeFromLong(curTime);

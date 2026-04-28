@@ -159,7 +159,11 @@ public class UserContactServiceImpl implements UserContactService {
         userContact.setStatus(status);
         this.userContactMapper.updateByUserIdAndContactId(userContact, userId, contactId);
 
-        //TODO 待完善，redis
+        // NOTE: 待完善，redis
+        //将我从对方的好友缓存中删除
+        redisComponent.removeUserContact(contactId, userId);
+        //将对方从我的列表中删除
+        redisComponent.removeUserContact(userId, contactId);
     }
 
     /**

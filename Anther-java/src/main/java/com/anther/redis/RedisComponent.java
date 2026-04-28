@@ -230,39 +230,3 @@ public class RedisComponent {
 //        return sysSettingDto;
 //    }
 }
-
-//@Component
-//public class RedisComponent {
-//
-//    @Resource
-//    private RedisUtils redisUtils;
-//
-//    public String saveCheckCode(String code){
-//        String checkCodeKey = UUID.randomUUID().toString();
-//        redisUtils.setex(Constants.REDIS_KEY_CHECK_CODE+checkCodeKey,code,Constants.REDIS_KEY_EXPIRES_ONE_MIN * 10);
-//        return checkCodeKey;
-//    }
-//
-//    public String getCheckCode(String checkCodeKey){
-//        return (String)redisUtils.get(Constants.REDIS_KEY_CHECK_CODE+checkCodeKey);
-//    }
-//
-//    public void clearCheckCode(String checkCodeKey){
-//        redisUtils.delete(Constants.REDIS_KEY_CHECK_CODE+checkCodeKey);
-//    }
-//
-//    public void saveTokenUserInfoDto(TokenUserInfoDto tokenUserInfoDto){
-//        redisUtils.setex(Constants.REDIS_KEY_WS_TOKEN+tokenUserInfoDto.getToken(),tokenUserInfoDto,Constants.REDIS_KEY_EXPIRES_DAY);
-//        redisUtils.setex(Constants.REDIS_KEY_WS_TOKEN_USERID+tokenUserInfoDto.getUserId(),tokenUserInfoDto.getToken(),Constants.REDIS_KEY_EXPIRES_DAY);
-//    }
-//
-//    public TokenUserInfoDto getTokenUserInfoDto(String token){
-////        return (TokenUserInfoDto)redisUtils.get(Constants.REDIS_KEY_WS_TOKEN+token);
-//        TokenUserInfoDto tokenUserInfoDto = (TokenUserInfoDto) redisUtils.get(Constants.REDIS_KEY_WS_TOKEN + token);
-//        return tokenUserInfoDto;
-//    }
-//
-//    public TokenUserInfoDto getTokenUserInfoDtoByUserId(String userId){
-//        return (TokenUserInfoDto)redisUtils.get(Constants.REDIS_KEY_WS_TOKEN_USERID+userId);
-//    }
-//}
