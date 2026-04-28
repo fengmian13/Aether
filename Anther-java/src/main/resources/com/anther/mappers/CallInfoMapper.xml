@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.anther.mappers.CallInfoMapper">
+
+    <resultMap id="base_result_map" type="com.anther.entity.po.CallInfo">
+        <id column="call_id" property="callId"/>
+        <result column="caller_user_id" property="callerUserId"/>
+        <result column="caller_nick_name" property="callerNickName"/>
+        <result column="callee_user_id" property="calleeUserId"/>
+        <result column="callee_nick_name" property="calleeNickName"/>
+        <result column="call_type" property="callType"/>
+        <result column="status" property="status"/>
+        <result column="start_time" property="startTime"/>
+        <result column="answer_time" property="answerTime"/>
+        <result column="end_time" property="endTime"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <sql id="base_column_list">
+        call_id, caller_user_id, caller_nick_name, callee_user_id, callee_nick_name,
+        call_type, status, start_time, answer_time, end_time, create_time, update_time
+    </sql>
+
+    <sql id="query_condition">
+        <where>
+            <if test="query.callId != null and query.callId != ''">
+                and call_id = #{query.callId}
+            </if>
+            <if test="query.callerUserId != null and query.callerUserId != ''">
+                and caller_user_id = #{query.callerUserId}
+            </if>
+            <if test="query.calleeUserId != null and query.calleeUserId != ''">
+                and callee_user_id = #{query.calleeUserId}
+            </if>
+            <if test="query.status != null">
+                and status = #{query.status}
+            </if>
+            <if test="query.startTime != null">
+                and start_time = #{query.startTime}
+            </if>
+            <if test="query.startTimeBefore != null">
+                <![CDATA[ and start_time <= #{query.startTimeBefore} ]]>
+            </if>
+        </where>
+    </sql>
+
+    <select id="selectList" resultMap="base_result_map">
+        select <include refid="base_column_list"/> from call_info
+        <include refid="query_condition"/>
+        <if test="query.orderBy != null">
+            order by ${query.orderBy}
+        </if>
+        <if test="query.simplePage != null">
+            limit #{query.simplePage.start},#{query.simplePage.end}
+        </if>
+    </select>
+
+    <select id="selectCount" resultType="java.lang.Integer">
+        select count(1) from call_info
+        <include refid="query_condition"/>
+    </select>
+
+    <insert id="insert" parameterType="com.anther.entity.po.CallInfo">
+        insert into call_info(
+            call_id, caller_user_id, caller_nick_name, callee_user_id, callee_nick_name,
+            call_type, status, start_time, answer_time, end_time, create_time, update_time
+        ) values (
+            #{bean.callId}, #{bean.callerUserId}, #{bean.callerNickName}, #{bean.calleeUserId}, #{bean.calleeNickName},
+            #{bean.callType}, #{bean.status}, #{bean.startTime}, #{bean.answerTime}, #{bean.endTime}, #{bean.createTime}, #{bean.updateTime}
+        )
+    </insert>
+
+    <insert id="insertBatch" parameterType="com.anther.entity.po.CallInfo">
+        insert into call_info(
+            call_id, caller_user_id, caller_nick_name, callee_user_id, callee_nick_name,
+            call_type, status, start_time, answer_time, end_time, create_time, update_time
+        ) values
+        <foreach collection="list" item="item" separator=",">
+            (
+                #{item.callId}, #{item.callerUserId}, #{item.callerNickName}, #{item.calleeUserId}, #{item.calleeNickName},
+                #{item.callType}, #{item.status}, #{item.startTime}, #{item.answerTime}, #{item.endTime}, #{item.createTime}, #{item.updateTime}
+            )
+        </foreach>
+    </insert>
+
+    <insert id="insertOrUpdate" parameterType="com.anther.entity.po.CallInfo">
+        insert into call_info(
+            call_id, caller_user_id, caller_nick_name, callee_user_id, callee_nick_name,
+            call_type, status, start_time, answer_time, end_time, create_time, update_time
+        ) values (
+            #{bean.callId}, #{bean.callerUserId}, #{bean.callerNickName}, #{bean.calleeUserId}, #{bean.calleeNickName},
+            #{bean.callType}, #{bean.status}, #{bean.startTime}, #{bean.answerTime}, #{bean.endTime}, #{bean.createTime}, #{bean.updateTime}
+        )
+        on duplicate key update
+            caller_user_id = values(caller_user_id),
+            caller_nick_name = values(caller_nick_name),
+            callee_user_id = values(callee_user_id),
+            callee_nick_name = values(callee_nick_name),
+            call_type = values(call_type),
+            status = values(status),
+            start_time = values(start_time),
+            answer_time = values(answer_time),
+            end_time = values(end_time),
+            create_time = values(create_time),
+            update_time = values(update_time)
+    </insert>
+
+    <insert id="insertOrUpdateBatch" parameterType="com.anther.entity.po.CallInfo">
+        insert into call_info(
+            call_id, caller_user_id, caller_nick_name, callee_user_id, callee_nick_name,
+            call_type, status, start_time, answer_time, end_time, create_time, update_time
+        ) values
+        <foreach collection="list" item="item" separator=",">
+            (
+                #{item.callId}, #{item.callerUserId}, #{item.callerNickName}, #{item.calleeUserId}, #{item.calleeNickName},
+                #{item.callType}, #{item.status}, #{item.startTime}, #{item.answerTime}, #{item.endTime}, #{item.createTime}, #{item.updateTime}
+            )
+        </foreach>
+        on duplicate key update
+            caller_user_id = values(caller_user_id),
+            caller_nick_name = values(caller_nick_name),
+            callee_user_id = values(callee_user_id),
+            callee_nick_name = values(callee_nick_name),
+            call_type = values(call_type),
+            status = values(status),
+            start_time = values(start_time),
+            answer_time = values(answer_time),
+            end_time = values(end_time),
+            create_time = values(create_time),
+            update_time = values(update_time)
+    </insert>
+
+    <update id="updateByParam" parameterType="com.anther.entity.po.CallInfo">
+        update call_info
+        <set>
+            <if test="bean.callerUserId != null">caller_user_id = #{bean.callerUserId},</if>
+            <if test="bean.callerNickName != null">caller_nick_name = #{bean.callerNickName},</if>
+            <if test="bean.calleeUserId != null">callee_user_id = #{bean.calleeUserId},</if>
+            <if test="bean.calleeNickName != null">callee_nick_name = #{bean.calleeNickName},</if>
+            <if test="bean.callType != null">call_type = #{bean.callType},</if>
+            <if test="bean.status != null">status = #{bean.status},</if>
+            <if test="bean.startTime != null">start_time = #{bean.startTime},</if>
+            <if test="bean.answerTime != null">answer_time = #{bean.answerTime},</if>
+            <if test="bean.endTime != null">end_time = #{bean.endTime},</if>
+            <if test="bean.createTime != null">create_time = #{bean.createTime},</if>
+            <if test="bean.updateTime != null">update_time = #{bean.updateTime},</if>
+        </set>
+        <include refid="query_condition"/>
+    </update>
+
+    <delete id="deleteByParam">
+        delete from call_info
+        <include refid="query_condition"/>
+    </delete>
+
+    <update id="updateByCallId" parameterType="com.anther.entity.po.CallInfo">
+        update call_info
+        <set>
+            <if test="bean.callerUserId != null">caller_user_id = #{bean.callerUserId},</if>
+            <if test="bean.callerNickName != null">caller_nick_name = #{bean.callerNickName},</if>
+            <if test="bean.calleeUserId != null">callee_user_id = #{bean.calleeUserId},</if>
+            <if test="bean.calleeNickName != null">callee_nick_name = #{bean.calleeNickName},</if>
+            <if test="bean.callType != null">call_type = #{bean.callType},</if>
+            <if test="bean.status != null">status = #{bean.status},</if>
+            <if test="bean.startTime != null">start_time = #{bean.startTime},</if>
+            <if test="bean.answerTime != null">answer_time = #{bean.answerTime},</if>
+            <if test="bean.endTime != null">end_time = #{bean.endTime},</if>
+            <if test="bean.createTime != null">create_time = #{bean.createTime},</if>
+            <if test="bean.updateTime != null">update_time = #{bean.updateTime},</if>
+        </set>
+        where call_id = #{callId}
+    </update>
+
+    <select id="selectByCallId" resultMap="base_result_map">
+        select <include refid="base_column_list"/> from call_info where call_id = #{callId}
+    </select>
+</mapper>

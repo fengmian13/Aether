@@ -9,6 +9,7 @@ import org.springframework.util.CollectionUtils;
 import javax.annotation.Resource;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 @Component("redisUtils")
@@ -99,6 +100,10 @@ public class RedisUtils<V> {
 
     public List<V> hvals(String key) {
         return (List<V>) redisTemplate.opsForHash().values(key);
+    }
+
+    public Map<Object, Object> hgetall(String key) {
+        return redisTemplate.opsForHash().entries(key);
     }
 
     public List<V> getQueueList(String key) {

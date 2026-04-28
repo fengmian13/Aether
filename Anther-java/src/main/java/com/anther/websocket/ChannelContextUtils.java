@@ -161,9 +161,16 @@ public class ChannelContextUtils {
         USER_CONTEXT_MAP.remove(userId);
     }
 
-    public void removeContext(Channel channel) {
+    public String getUserId(Channel channel) {
+        if (channel == null) {
+            return null;
+        }
         Attribute<String> attribute = channel.attr(AttributeKey.valueOf(channel.id().toString()));
-        String userId = attribute.get();
+        return attribute.get();
+    }
+
+    public void removeContext(Channel channel) {
+        String userId = getUserId(channel);
         if (!StringTools.isEmpty(userId)) {
             USER_CONTEXT_MAP.remove(userId);
         }

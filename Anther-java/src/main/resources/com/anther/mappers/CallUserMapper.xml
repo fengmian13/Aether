@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.anther.mappers.CallUserMapper">
+
+    <resultMap id="base_result_map" type="com.anther.entity.po.CallUser">
+        <id column="id" property="id"/>
+        <result column="call_id" property="callId"/>
+        <result column="user_id" property="userId"/>
+        <result column="nick_name" property="nickName"/>
+        <result column="role" property="role"/>
+        <result column="join_status" property="joinStatus"/>
+        <result column="audio_enabled" property="audioEnabled"/>
+        <result column="video_enabled" property="videoEnabled"/>
+        <result column="rtc_status" property="rtcStatus"/>
+        <result column="join_time" property="joinTime"/>
+        <result column="leave_time" property="leaveTime"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <sql id="base_column_list">
+        id, call_id, user_id, nick_name, role, join_status, audio_enabled, video_enabled,
+        rtc_status, join_time, leave_time, create_time, update_time
+    </sql>
+
+    <sql id="query_condition">
+        <where>
+            <if test="query.id != null">
+                and id = #{query.id}
+            </if>
+            <if test="query.callId != null and query.callId != ''">
+                and call_id = #{query.callId}
+            </if>
+            <if test="query.userId != null and query.userId != ''">
+                and user_id = #{query.userId}
+            </if>
+            <if test="query.role != null">
+                and role = #{query.role}
+            </if>
+            <if test="query.joinStatus != null">
+                and join_status = #{query.joinStatus}
+            </if>
+        </where>
+    </sql>
+
+    <select id="selectList" resultMap="base_result_map">
+        select <include refid="base_column_list"/> from call_user
+        <include refid="query_condition"/>
+        <if test="query.orderBy != null">
+            order by ${query.orderBy}
+        </if>
+        <if test="query.simplePage != null">
+            limit #{query.simplePage.start},#{query.simplePage.end}
+        </if>
+    </select>
+
+    <select id="selectCount" resultType="java.lang.Integer">
+        select count(1) from call_user
+        <include refid="query_condition"/>
+    </select>
+
+    <insert id="insert" parameterType="com.anther.entity.po.CallUser" useGeneratedKeys="true" keyProperty="bean.id">
+        insert into call_user(
+            call_id, user_id, nick_name, role, join_status, audio_enabled, video_enabled,
+            rtc_status, join_time, leave_time, create_time, update_time
+        ) values (
+            #{bean.callId}, #{bean.userId}, #{bean.nickName}, #{bean.role}, #{bean.joinStatus}, #{bean.audioEnabled}, #{bean.videoEnabled},
+            #{bean.rtcStatus}, #{bean.joinTime}, #{bean.leaveTime}, #{bean.createTime}, #{bean.updateTime}
+        )
+    </insert>
+
+    <insert id="insertBatch" parameterType="com.anther.entity.po.CallUser" useGeneratedKeys="true" keyProperty="id">
+        insert into call_user(
+            call_id, user_id, nick_name, role, join_status, audio_enabled, video_enabled,
+            rtc_status, join_time, leave_time, create_time, update_time
+        ) values
+        <foreach collection="list" item="item" separator=",">
+            (
+                #{item.callId}, #{item.userId}, #{item.nickName}, #{item.role}, #{item.joinStatus}, #{item.audioEnabled}, #{item.videoEnabled},
+                #{item.rtcStatus}, #{item.joinTime}, #{item.leaveTime}, #{item.createTime}, #{item.updateTime}
+            )
+        </foreach>
+    </insert>
+
+    <insert id="insertOrUpdate" parameterType="com.anther.entity.po.CallUser">
+        insert into call_user(
+            id, call_id, user_id, nick_name, role, join_status, audio_enabled, video_enabled,
+            rtc_status, join_time, leave_time, create_time, update_time
+        ) values (
+            #{bean.id}, #{bean.callId}, #{bean.userId}, #{bean.nickName}, #{bean.role}, #{bean.joinStatus}, #{bean.audioEnabled}, #{bean.videoEnabled},
+            #{bean.rtcStatus}, #{bean.joinTime}, #{bean.leaveTime}, #{bean.createTime}, #{bean.updateTime}
+        )
+        on duplicate key update
+            call_id = values(call_id),
+            user_id = values(user_id),
+            nick_name = values(nick_name),
+            role = values(role),
+            join_status = values(join_status),
+            audio_enabled = values(audio_enabled),
+            video_enabled = values(video_enabled),
+            rtc_status = values(rtc_status),
+            join_time = values(join_time),
+            leave_time = values(leave_time),
+            create_time = values(create_time),
+            update_time = values(update_time)
+    </insert>
+
+    <insert id="insertOrUpdateBatch" parameterType="com.anther.entity.po.CallUser">
+        insert into call_user(
+            id, call_id, user_id, nick_name, role, join_status, audio_enabled, video_enabled,
+            rtc_status, join_time, leave_time, create_time, update_time
+        ) values
+        <foreach collection="list" item="item" separator=",">
+            (
+                #{item.id}, #{item.callId}, #{item.userId}, #{item.nickName}, #{item.role}, #{item.joinStatus}, #{item.audioEnabled}, #{item.videoEnabled},
+                #{item.rtcStatus}, #{item.joinTime}, #{item.leaveTime}, #{item.createTime}, #{item.updateTime}
+            )
+        </foreach>
+        on duplicate key update
+            call_id = values(call_id),
+            user_id = values(user_id),
+            nick_name = values(nick_name),
+            role = values(role),
+            join_status = values(join_status),
+            audio_enabled = values(audio_enabled),
+            video_enabled = values(video_enabled),
+            rtc_status = values(rtc_status),
+            join_time = values(join_time),
+            leave_time = values(leave_time),
+            create_time = values(create_time),
+            update_time = values(update_time)
+    </insert>
+
+    <update id="updateByParam" parameterType="com.anther.entity.po.CallUser">
+        update call_user
+        <set>
+            <if test="bean.callId != null">call_id = #{bean.callId},</if>
+            <if test="bean.userId != null">user_id = #{bean.userId},</if>
+            <if test="bean.nickName != null">nick_name = #{bean.nickName},</if>
+            <if test="bean.role != null">role = #{bean.role},</if>
+            <if test="bean.joinStatus != null">join_status = #{bean.joinStatus},</if>
+            <if test="bean.audioEnabled != null">audio_enabled = #{bean.audioEnabled},</if>
+            <if test="bean.videoEnabled != null">video_enabled = #{bean.videoEnabled},</if>
+            <if test="bean.rtcStatus != null">rtc_status = #{bean.rtcStatus},</if>
+            <if test="bean.joinTime != null">join_time = #{bean.joinTime},</if>
+            <if test="bean.leaveTime != null">leave_time = #{bean.leaveTime},</if>
+            <if test="bean.createTime != null">create_time = #{bean.createTime},</if>
+            <if test="bean.updateTime != null">update_time = #{bean.updateTime},</if>
+        </set>
+        <include refid="query_condition"/>
+    </update>
+
+    <delete id="deleteByParam">
+        delete from call_user
+        <include refid="query_condition"/>
+    </delete>
+
+    <update id="updateByCallIdAndUserId" parameterType="com.anther.entity.po.CallUser">
+        update call_user
+        <set>
+            <if test="bean.nickName != null">nick_name = #{bean.nickName},</if>
+            <if test="bean.role != null">role = #{bean.role},</if>
+            <if test="bean.joinStatus != null">join_status = #{bean.joinStatus},</if>
+            <if test="bean.audioEnabled != null">audio_enabled = #{bean.audioEnabled},</if>
+            <if test="bean.videoEnabled != null">video_enabled = #{bean.videoEnabled},</if>
+            <if test="bean.rtcStatus != null">rtc_status = #{bean.rtcStatus},</if>
+            <if test="bean.joinTime != null">join_time = #{bean.joinTime},</if>
+            <if test="bean.leaveTime != null">leave_time = #{bean.leaveTime},</if>
+            <if test="bean.createTime != null">create_time = #{bean.createTime},</if>
+            <if test="bean.updateTime != null">update_time = #{bean.updateTime},</if>
+        </set>
+        where call_id = #{callId} and user_id = #{userId}
+    </update>
+
+    <select id="selectByCallIdAndUserId" resultMap="base_result_map">
+        select <include refid="base_column_list"/> from call_user where call_id = #{callId} and user_id = #{userId}
+    </select>
+
+    <select id="selectByCallId" resultMap="base_result_map">
+        select <include refid="base_column_list"/> from call_user where call_id = #{callId} order by role asc, id asc
+    </select>
+</mapper>

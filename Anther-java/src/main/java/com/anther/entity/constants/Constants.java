@@ -29,6 +29,8 @@ public class Constants {
 
     public static final String PING = "ping";
 
+    public static final String HEART_BEAT = "heart beat";
+
     public static final String IMAGE_SUFFIX = ".png";
 
     public static final String COVER_IMAGE_SUFFIX = "_cover.png";
@@ -79,6 +81,14 @@ public class Constants {
     public static final String REDIS_KEY_INVITE_MEMBER = REDIS_KEY_PREFIX + "anther:invite:member:";
 
     public static final String REDIS_KEY_SYS_SETTING = REDIS_KEY_PREFIX + "sysSetting:";
+
+    public static final String REDIS_KEY_CALL_INFO = "call:info:";
+
+    public static final String REDIS_KEY_CALL_USER_CURRENT = "call:user:";
+
+    public static final String REDIS_KEY_CALL_USERS = "call:users:";
+
+    public static final Integer CALL_RING_TIMEOUT_SECONDS = 30;
 
     public static final String MEETING_NO_PRIFIX = "M";
 

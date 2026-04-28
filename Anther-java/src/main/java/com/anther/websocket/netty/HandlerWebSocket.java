@@ -1,121 +1,94 @@
 package com.anther.websocket.netty;
 
 import com.anther.entity.constants.Constants;
-import com.anther.entity.dto.MessageSendDto;
-import com.anther.entity.dto.PeerConnectionDataDto;
-import com.anther.entity.dto.PeerMessageDto;
+import com.anther.entity.dto.CallSignalDto;
 import com.anther.entity.dto.TokenUserInfoDto;
-import com.anther.entity.enums.MessageSend2TypeEnum;
-import com.anther.entity.enums.MessageTypeEnum;
+import com.anther.exception.BusinessException;
 import com.anther.redis.RedisComponent;
-//import com.anther.service.MeetingInfoService;
-import com.anther.service.ChatMessageService;
+import com.anther.service.CallService;
+import com.anther.service.CallSignalService;
 import com.anther.utils.JsonUtils;
+import com.anther.utils.StringTools;
 import com.anther.websocket.ChannelContextUtils;
-import com.anther.websocket.message.MessageHandler;
-import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
-import io.netty.util.Attribute;
-import io.netty.util.AttributeKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 
-/**
- * @Description ws 业务处理
- * @Author 程序员老罗
- * @Date 2023/12/17 10:10
- */
-
-/**
- * 设置通道共享
- */
 @ChannelHandler.Sharable
 @Component("handlerWebSocket")
 public class HandlerWebSocket extends SimpleChannelInboundHandler<TextWebSocketFrame> {
 
     private static final Logger logger = LoggerFactory.getLogger(HandlerWebSocket.class);
 
-//    @Resource
-//    private MeetingInfoService meetingInfoService;
-
     @Resource
     private ChannelContextUtils channelContextUtils;
-
-    @Resource
-    private ChatMessageService chatMessageService;
 
     @Resource
     private RedisComponent redisComponet;
 
     @Resource
-    private MessageHandler messageHandler;
+    private CallSignalService callSignalService;
 
-    /**
-     * 当通道就绪后会调用此方法，通常我们会在这里做一些初始化操作
-     *
-     * @param ctx
-     * @throws Exception
-     */
+    @Resource
+    private CallService callService;
+
     @Override
-    public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        // Channel channel = ctx.channel();
-        logger.info("有新的连接加入。。。");
+    public void channelActive(ChannelHandlerContext ctx) {
+        logger.info("websocket channel active: {}", ctx.channel().id());
     }
 
-    /**
-     * 当通道不再活跃时（连接关闭）会调用此方法，我们可以在这里做一些清理工作
-     *
-     * @param ctx
-     * @throws Exception
-     */
     @Override
     public void channelInactive(ChannelHandlerContext ctx) {
-        logger.info("有连接已经断开。。。");
+        String userId = channelContextUtils.getUserId(ctx.channel());
+        if (!StringTools.isEmpty(userId)) {
+            callService.handleOffline(userId);
+        }
         channelContextUtils.removeContext(ctx.channel());
     }
 
-    /**
-     * 读就绪事件 当有消息可读时会调用此方法，我们可以在这里读取消息并处理。
-     *
-     * @param ctx
-     * @param textWebSocketFrame
-     * @throws Exception
-     */
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, TextWebSocketFrame textWebSocketFrame) {
-        //接收心跳
-//        logger.info("收到消息:{}", textWebSocketFrame.text());
         String text = textWebSocketFrame.text();
-        if (Constants.PING.equals(text)) {
-            Channel channel = ctx.channel();
-            Attribute<String> attribute = channel.attr(AttributeKey.valueOf(channel.id().toString()));
-            String userId = attribute.get();
-            redisComponet.saveUserHeartBeat(userId);
+        if (isHeartBeat(text)) {
+            String userId = channelContextUtils.getUserId(ctx.channel());
+            if (!StringTools.isEmpty(userId)) {
+                redisComponet.saveUserHeartBeat(userId);
+            }
+            return;
         }
+        String userId = channelContextUtils.getUserId(ctx.channel());
+        if (StringTools.isEmpty(userId)) {
+            return;
+        }
+        TokenUserInfoDto tokenUserInfoDto = redisComponet.getTokenUserInfoDtoByUserId(userId);
+        if (tokenUserInfoDto == null) {
+            return;
+        }
+        try {
+            CallSignalDto signalDto = JsonUtils.convertJson2Obj(text, CallSignalDto.class);
+            callSignalService.handleSignal(tokenUserInfoDto, signalDto);
+        } catch (BusinessException e) {
+            logger.warn("ignore invalid websocket payload, userId:{}, text:{}", userId, text);
+        }
+    }
 
-//        PeerConnectionDataDto dataDto = JsonUtils.convertJson2Obj(text, PeerConnectionDataDto.class);
-//        TokenUserInfoDto tokenUserInfoDto = redisComponet.getTokenUserInfoDto(dataDto.getToken());
-//        if (tokenUserInfoDto == null) {
-//            return;
-//        }
-//        MessageSendDto messageSendDto = new MessageSendDto();
-//        messageSendDto.setMessageType(MessageTypeEnum.PEER.getType());
-//
-//        PeerMessageDto peerMessageDto = new PeerMessageDto();
-//        peerMessageDto.setSignalType(dataDto.getSignalType());
-//        peerMessageDto.setSignalData(dataDto.getSignalData());
-//
-//        messageSendDto.setMessageContent(peerMessageDto);
-//        messageSendDto.setMeetingId(tokenUserInfoDto.getCurrentMeetingId());
-//        messageSendDto.setSendUserId(tokenUserInfoDto.getUserId());
-//        messageSendDto.setReceiveUserId(dataDto.getReceiveUserId());
-//        messageSendDto.setMessageSend2Type(MessageSend2TypeEnum.USER.getType());
-//        messageHandler.sendMessage(messageSendDto);
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
+        logger.warn("websocket handler exception, channelId:{}", ctx.channel().id(), cause);
+        ctx.close();
+    }
+
+    private boolean isHeartBeat(String text) {
+        if (StringTools.isEmpty(text)) {
+            return false;
+        }
+        return Constants.PING.equalsIgnoreCase(text.trim())
+                || Constants.HEART_BEAT.equalsIgnoreCase(text.trim());
     }
 }
