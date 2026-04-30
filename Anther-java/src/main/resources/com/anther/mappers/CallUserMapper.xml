@@ -173,6 +173,10 @@
         where call_id = #{callId} and user_id = #{userId}
     </update>
 
+    <delete id="deleteByCallIdAndUserId">
+        delete from call_user where call_id = #{callId} and user_id = #{userId}
+    </delete>
+
     <select id="selectByCallIdAndUserId" resultMap="base_result_map">
         select <include refid="base_column_list"/> from call_user where call_id = #{callId} and user_id = #{userId}
     </select>

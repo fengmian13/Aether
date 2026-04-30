@@ -173,6 +173,10 @@
         where call_id = #{callId}
     </update>
 
+    <delete id="deleteByCallId">
+        delete from call_info where call_id = #{callId}
+    </delete>
+
     <select id="selectByCallId" resultMap="base_result_map">
         select <include refid="base_column_list"/> from call_info where call_id = #{callId}
     </select>
